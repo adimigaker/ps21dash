@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri Media - Pirate Studio 21</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin.css">
+    <style>
+    /* ─── GALERI ─────────────────────────────── */
+    .galeri-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 20px;
+        gap: 12px;
+        flex-wrap: wrap;
+        background: var(--admin-surface);
+        border-bottom: 1px solid var(--admin-border);
+    }
+    .galeri-info {
+        font-size: 0.8rem;
+        color: var(--admin-text2);
+    }
+    .galeri-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+        padding: 20px;
+    }
+    .galeri-item {
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border);
+        border-radius: var(--admin-radius);
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.2s, transform 0.2s;
+        position: relative;
+    }
+    .galeri-item:hover {
+        border-color: var(--admin-accent);
+        transform: translateY(-2px);
+    }
+    .galeri-item img {
+        width: 100%;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        display: block;
+        background: var(--admin-card);
+    }
+    .galeri-item-info {
+        padding: 8px;
+    }
+    .galeri-item-name {
+        font-size: 0.7rem;
+        color: var(--admin-text2);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .galeri-item-date {
+        font-size: 0.65rem;
+        color: var(--admin-text3);
+        margin-top: 2px;
+    }
+    .galeri-item-copy {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: rgba(0,0,0,0.7);
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        padding: 4px 6px;
+        font-size: 0.65rem;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .galeri-item:hover .galeri-item-copy { opacity: 1; }
+    .galeri-item-copy:hover { background: var(--admin-accent); }
+
+    /* ─── LIGHTBOX ───────────────────────────── */
+    .lightbox {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.92);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        padding: 20px;
+        gap: 16px;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox img {
+        max-width: min(90vw, 500px);
+        max-height: 70vh;
+        object-fit: contain;
+        border-radius: 8px;
+        border: 1px solid var(--admin-border);
+    }
+    .lightbox-url {
+        background: var(--admin-card);
+        border: 1px solid var(--admin-border);
+        border-radius: var(--admin-radius);
+        padding: 10px 14px;
+        color: var(--admin-text);
+        font-size: 0.78rem;
+        width: min(90vw, 500px);
+        word-break: break-all;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+    .lightbox-url:hover { border-color: var(--admin-accent); }
+    .lightbox-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .lightbox-close {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        background: var(--admin-card);
+        border: 1px solid var(--admin-border);
+        color: var(--admin-text);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: background 0.2s;
+    }
+    .lightbox-close:hover { background: var(--admin-accent); }
+    .lightbox-name {
+        font-size: 0.75rem;
+        color: var(--admin-text2);
+        text-align: center;
+    }
+
+    /* ─── STATES ─────────────────────────────── */
+    .galeri-loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--admin-text3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+    }
+    .galeri-empty {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--admin-text3);
+    }
+    .spin {
+        animation: spin 1s linear infinite;
+        display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 400px) {
+        .galeri-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; padding: 12px; }
+    }
+    </style>
+</head>
+<body>
+
+    <header class="admin-header">
+        <a href="index.html" class="admin-logo">
+            <span class="logo-red">PIRATE</span><span>STUDIO</span> 21
+        </a>
+        <div class="admin-header-right">
+            <span class="admin-badge">GALERI</span>
+            <a href="index.html" class="admin-link">← Dashboard</a>
+        </div>
+    </header>
+
+    <div class="galeri-toolbar">
+        <div class="galeri-info" id="galeri-info">Memuat...</div>
+        <div style="display:flex;gap:8px;">
+            <button class="admin-btn admin-btn-secondary" onclick="loadGaleri()" id="btn-refresh">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                </svg>
+                Refresh
+            </button>
+            <button class="admin-btn admin-btn-primary" onclick="uploadGambar()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                </svg>
+                + Tambah Gambar
+            </button>
+        </div>
+    </div>
+
+    <div id="galeri-container">
+        <div class="galeri-loading">
+            <svg class="spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <circle cx="12" cy="12" r="10" stroke-opacity="0.2"/>
+                <path d="M12 2a10 10 0 0 1 10 10" stroke="var(--admin-accent)"/>
+            </svg>
+            <span>Memuat galeri dari Google Drive...</span>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+        <img id="lightbox-img" src="" alt="">
+        <div class="lightbox-name" id="lightbox-name"></div>
+        <div class="lightbox-url" id="lightbox-url" onclick="copyUrl()" title="Klik untuk copy URL"></div>
+        <div class="lightbox-actions">
+            <button class="admin-btn admin-btn-primary" onclick="copyUrl()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                </svg>
+                Copy URL
+            </button>
+            <a id="lightbox-open" href="#" target="_blank" class="admin-btn admin-btn-secondary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+                Buka
+            </a>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script>
+    var currentUrl = '';
+
+    function showToast(msg, type) {
+        var toast = document.getElementById('toast');
+        if (!toast) return;
+        toast.textContent = msg;
+        toast.className = 'toast ' + (type || 'info') + ' show';
+        clearTimeout(toast._t);
+        toast._t = setTimeout(function() { toast.classList.remove('show'); }, 2500);
+    }
+
+    async function loadGaleri() {
+        var container = document.getElementById('galeri-container');
+        var info = document.getElementById('galeri-info');
+        var btn = document.getElementById('btn-refresh');
+
+        container.innerHTML = '<div class="galeri-loading"><svg class="spin" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10" stroke="var(--admin-accent)"/></svg><span>Memuat...</span></div>';
+        info.textContent = 'Memuat...';
+        if (btn) btn.disabled = true;
+
+        try {
+            var res = await DASHBOARD_API.fetchGET('listImages');
+
+            if (res.status !== 'success' || !res.data || res.data.length === 0) {
+                container.innerHTML = '<div class="galeri-empty"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="opacity:0.2;margin-bottom:12px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Belum ada gambar di folder Drive</p></div>';
+                info.textContent = '0 gambar';
+                return;
+            }
+
+            var files = res.data;
+            info.textContent = files.length + ' gambar';
+
+            var html = '<div class="galeri-grid">';
+            for (var i = 0; i < files.length; i++) {
+                var f = files[i];
+                var url = 'https://lh3.googleusercontent.com/d/' + f.id + '=w500';
+                var date = f.date ? new Date(f.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+                html += '<div class="galeri-item" onclick="openLightbox(\'' + f.id + '\',\'' + escHtml(f.name) + '\')">';
+                html += '<img src="' + url + '" alt="' + escHtml(f.name) + '" loading="lazy" onerror="this.style.opacity=0.2">';
+                html += '<div class="galeri-item-info">';
+                html += '<div class="galeri-item-name">' + escHtml(f.name) + '</div>';
+                if (date) html += '<div class="galeri-item-date">' + date + '</div>';
+                html += '</div>';
+                html += '<button class="galeri-item-copy" onclick="event.stopPropagation();quickCopy(\'' + f.id + '\')">';
+                html += '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+                html += '</button>';
+                html += '</div>';
+            }
+            html += '</div>';
+            container.innerHTML = html;
+
+        } catch (err) {
+            container.innerHTML = '<div class="galeri-empty">❌ Gagal memuat: ' + err.message + '</div>';
+            info.textContent = 'Error';
+        }
+
+        if (btn) btn.disabled = false;
+    }
+
+    function openLightbox(fileId, name) {
+        var url = 'https://lh3.googleusercontent.com/d/' + fileId + '=w500';
+        currentUrl = url;
+        document.getElementById('lightbox-img').src = url;
+        document.getElementById('lightbox-name').textContent = name;
+        document.getElementById('lightbox-url').textContent = url;
+        document.getElementById('lightbox-open').href = url;
+        document.getElementById('lightbox').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox(e) {
+        if (e && e.target !== document.getElementById('lightbox')) return;
+        document.getElementById('lightbox').classList.remove('open');
+        document.getElementById('lightbox-img').src = '';
+        document.body.style.overflow = '';
+    }
+
+    function copyUrl() {
+        if (!currentUrl) return;
+        navigator.clipboard.writeText(currentUrl).then(function() {
+            showToast('✅ URL disalin!', 'success');
+        }).catch(function() {
+            // fallback
+            var el = document.createElement('textarea');
+            el.value = currentUrl;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            showToast('✅ URL disalin!', 'success');
+        });
+    }
+
+    function quickCopy(fileId) {
+        var url = 'https://lh3.googleusercontent.com/d/' + fileId + '=w500';
+        currentUrl = url;
+        copyUrl();
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Tutup lightbox dengan Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.getElementById('lightbox').classList.remove('open');
+            document.getElementById('lightbox-img').src = '';
+            document.body.style.overflow = '';
+        }
+    });
+
+    function uploadGambar() {
+        var fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.onchange = async function() {
+            var file = fileInput.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) { showToast('❌ Maks 5MB', 'error'); return; }
+            showToast('⏳ Mengupload...', 'info');
+            try {
+                var result = await DASHBOARD_API.uploadImage(file);
+                if (result.status === 'success') {
+                    showToast('✅ Upload berhasil!', 'success');
+                    loadGaleri();
+                } else {
+                    showToast('❌ ' + (result.message || 'Gagal'), 'error');
+                }
+            } catch (err) {
+                showToast('❌ Error: ' + err.message, 'error');
+            }
+        };
+        fileInput.click();
+    }
+
+    loadGaleri();
+    </script>
+</body>
+</html>
