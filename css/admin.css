@@ -596,3 +596,16 @@ a { color: inherit; text-decoration: none; }
 
 /* ─── ADMIN LINK ICON ALIGN ──────────────────── */
 .admin-link svg { vertical-align: middle; margin-top: -2px; }
+
+/* ─── CLICKABLE TITLE & COVER ────────────────── */
+.table-title-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+.table-title-link:hover .table-title {
+    color: var(--admin-accent, #e50914);
+}
+.cover-wrap:hover .table-poster {
+    opacity: 0.8;
+}
