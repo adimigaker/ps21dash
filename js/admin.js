@@ -283,11 +283,11 @@ function addEpisodeBelow(btn) {
     var container = document.getElementById('episode-list');
     var currentNum = parseInt(episodeItem.dataset.ep);
     var newNum = currentNum + 1;
-    
+
     // Ambil episode AFTER current (yaitu D) untuk di-copy nilainya
     var nextItem = episodeItem.nextSibling;
     var nextEpisodeData = null;
-    
+
     if (nextItem) {
         // Jika ada episode D, copy nilainya
         nextEpisodeData = {
@@ -308,20 +308,20 @@ function addEpisodeBelow(btn) {
             subtitle: ''
         };
     }
-    
+
     var newDiv = createEpisodeElement(nextEpisodeData);
-    
+
     // Insert setelah episode saat ini (C)
     if (nextItem) {
         container.insertBefore(newDiv, nextItem);
     } else {
         container.appendChild(newDiv);
     }
-    
+
     // ✅ TIDAK menggeser episode D, E, dll
     // Hanya update episodeCount tanpa sorting ulang
     episodeCount = document.querySelectorAll('.episode-item').length;
-    
+
     // Scroll ke episode baru
     setTimeout(function() {
         newDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -339,16 +339,16 @@ function insertEpisodeAbove(btn) {
     var container = document.getElementById('episode-list');
     var currentNum = parseInt(episodeItem.dataset.ep);
     var newNum = currentNum - 1;
-    
+
     if (newNum < 1) {
         showToast('Nomor episode minimal 1', 'error');
         return;
     }
-    
+
     // Ambil episode BEFORE current (yaitu B) untuk di-copy nilainya
     var prevItem = episodeItem.previousSibling;
     var prevEpisodeData = null;
-    
+
     if (prevItem) {
         // Jika ada episode B, copy nilainya
         prevEpisodeData = {
@@ -369,17 +369,17 @@ function insertEpisodeAbove(btn) {
             subtitle: ''
         };
     }
-    
+
     var newDiv = createEpisodeElement(prevEpisodeData);
-    
+
     // Insert SEBELUM episode saat ini (C)
     container.insertBefore(newDiv, episodeItem);
-    
+
     // ✅ TIDAK menggeser episode C, D, E, dll
     // Episode C tetap bernomor sama, tidak berubah
-    
+
     episodeCount = document.querySelectorAll('.episode-item').length;
-    
+
     // Scroll ke episode baru
     setTimeout(function() {
         newDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -395,7 +395,7 @@ function insertEpisodeAbove(btn) {
 function addEpisodeToEnd() {
     var container = document.getElementById('episode-list');
     if (!container) return;
-    
+
     var items = document.querySelectorAll('.episode-item');
     var lastNum = 0;
     for (var i = 0; i < items.length; i++) {
@@ -403,7 +403,7 @@ function addEpisodeToEnd() {
         if (!isNaN(num) && num > lastNum) lastNum = num;
     }
     var newNum = lastNum + 1;
-    
+
     var episodeData = {
         ep: newNum,
         embed: '',
@@ -411,12 +411,12 @@ function addEpisodeToEnd() {
         mirror: '',
         subtitle: ''
     };
-    
+
     var newDiv = createEpisodeElement(episodeData);
     container.appendChild(newDiv);
-    
+
     episodeCount = items.length + 1;
-    
+
     // Scroll ke episode baru (tanpa pindah ke atas dulu)
     setTimeout(function() {
         newDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -446,9 +446,9 @@ function removeEpisode(btn) {
     var prevItem = item.previousSibling;
     var scrollTarget = nextItem || prevItem || null;
     item.remove();
-    
+
     episodeCount = document.querySelectorAll('.episode-item').length;
-    
+
     // Scroll ke episode terdekat (tanpa pindah ke atas dulu)
     if (scrollTarget) {
         setTimeout(function() {
@@ -465,22 +465,22 @@ function removeEpisode(btn) {
 function editEpisodeNumber(btn) {
     var numArea = btn.closest('.episode-num-area');
     if (!numArea) return;
-    
+
     var textSpan = numArea.querySelector('.episode-num-text');
     var currentNum = parseInt(textSpan.textContent.replace('Episode ', ''));
-    
+
     if (numArea.dataset.editing === 'true') return;
-    
+
     numArea.dataset.originalNum = currentNum;
     numArea.dataset.editing = 'true';
-    
+
     var inputHtml = '<input type="number" class="episode-num-input" value="' + currentNum + '" min="1" step="1">';
     inputHtml += '<button type="button" class="episode-save-btn" onclick="saveEpisodeNumber(this)">';
     inputHtml += '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>';
     inputHtml += '</button>';
-    
+
     numArea.innerHTML = inputHtml;
-    
+
     var input = numArea.querySelector('input');
     if (input) input.focus();
 }
@@ -488,14 +488,14 @@ function editEpisodeNumber(btn) {
 function saveEpisodeNumber(btn) {
     var numArea = btn.closest('.episode-num-area');
     if (!numArea) return;
-    
+
     var input = numArea.querySelector('input');
     var newNum = parseInt(input.value);
     if (isNaN(newNum) || newNum < 1) newNum = 1;
-    
+
     var episodeItem = numArea.closest('.episode-item');
     episodeItem.dataset.ep = newNum;
-    
+
     // Kembalikan ke tampilan teks
     numArea.dataset.editing = 'false';
     numArea.innerHTML = [
@@ -504,32 +504,32 @@ function saveEpisodeNumber(btn) {
         '  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
         '</button>'
     ].join('');
-    
+
     sortEpisodesByNumber();
 }
 
 function sortEpisodesByNumber() {
     var container = document.getElementById('episode-list');
     if (!container) return;
-    
+
     var items = Array.from(container.querySelectorAll('.episode-item'));
     items.sort(function(a, b) {
         return parseInt(a.dataset.ep) - parseInt(b.dataset.ep);
     });
-    
+
     // Simpan posisi scroll saat ini
     var scrollContainer = container.parentElement;
     var scrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
-    
+
     for (var i = 0; i < items.length; i++) {
         container.appendChild(items[i]);
     }
-    
+
     // Kembalikan posisi scroll
     if (scrollContainer) {
         scrollContainer.scrollTop = scrollTop;
     }
-    
+
     episodeCount = items.length;
 }
 
@@ -555,15 +555,15 @@ function getEpisodes() {
 function loadEpisodes(embedData, downloadData, mirrorData, subtitleData) {
     var container = document.getElementById('episode-list');
     if (!container) return;
-    
+
     container.innerHTML = '';
     episodeCount = 0;
-    
+
     var embedArray = [];
     var downloadArray = [];
     var mirrorArray = [];
     var subtitleArray = [];
-    
+
     try {
         if (embedData && embedData !== '[]' && embedData !== '') {
             embedArray = typeof embedData === 'string' ? JSON.parse(embedData) : embedData;
@@ -580,9 +580,9 @@ function loadEpisodes(embedData, downloadData, mirrorData, subtitleData) {
     } catch(e) {
         console.error('Error parsing episode data:', e);
     }
-    
+
     var episodeMap = {};
-    
+
     for (var i = 0; i < embedArray.length; i++) {
         var ep = embedArray[i].ep;
         if (!episodeMap[ep]) episodeMap[ep] = { embed: '', download: '', mirror: '', subtitle: '' };
@@ -603,7 +603,7 @@ function loadEpisodes(embedData, downloadData, mirrorData, subtitleData) {
         if (!episodeMap[ep]) episodeMap[ep] = { embed: '', download: '', mirror: '', subtitle: '' };
         episodeMap[ep].subtitle = subtitleArray[i].subtitle || '';
     }
-    
+
     var episodes = [];
     for (var epNum in episodeMap) {
         episodes.push({
@@ -615,7 +615,7 @@ function loadEpisodes(embedData, downloadData, mirrorData, subtitleData) {
         });
     }
     episodes.sort(function(a, b) { return a.ep - b.ep; });
-    
+
     for (var i = 0; i < episodes.length; i++) {
         var newDiv = createEpisodeElement(episodes[i]);
         container.appendChild(newDiv);
@@ -640,7 +640,7 @@ async function loadFilmData(id) {
             return; 
         }
         var f = res.data;
-        
+
         setVal('film-id', f.id);
         setVal('film-type', f.type);
         setVal('film-title', f.title);
@@ -655,15 +655,15 @@ async function loadFilmData(id) {
         setVal('film-poster', f.poster);
         setVal('film-backdrop', f.backdrop);
         setVal('film-trailer', f.trailer);
-        
+
         var featuredCheck = document.getElementById('film-featured');
         var popularCheck = document.getElementById('film-popular');
         if (featuredCheck) featuredCheck.checked = f.featured === 'TRUE';
         if (popularCheck) popularCheck.checked = f.popular === 'TRUE';
-        
+
         if (f.poster) showPreview(document.getElementById('poster-preview'), f.poster);
         if (f.backdrop) showPreview(document.getElementById('backdrop-preview'), f.backdrop);
-        
+
         if (f.type === 'series') {
             if (typeof toggleSeriesPanel === 'function') toggleSeriesPanel();
             loadEpisodes(f.embed_url, f.download_url, f.mirror_url, f.subtitle_url);
@@ -673,7 +673,7 @@ async function loadFilmData(id) {
             setVal('film-mirror', f.mirror_url || '');
             setVal('film-subtitle', f.subtitle_url || '');
         }
-        
+
         showToast('Data dimuat', 'success');
     } catch (e) { 
         console.error('Error loadFilmData:', e);
@@ -690,12 +690,12 @@ async function submitFilm(action) {
         var idField = document.getElementById('film-id');
         var id = idField ? idField.value.trim() : '';
         if (!id) id = document.getElementById('original-id')?.value.trim() || '';
-        
+
         if (!id) { showToast('ID diperlukan!', 'error'); return; }
 
         var type = document.getElementById('film-type')?.value || 'movie';
         var isSeries = (type === 'series');
-        
+
         var data = {
             id: id,
             title: document.getElementById('film-title')?.value.trim() || '',
@@ -715,16 +715,16 @@ async function submitFilm(action) {
             popular: document.getElementById('film-popular')?.checked ? 'TRUE' : 'FALSE',
             status: action === 'publish' ? 'published' : 'draft'
         };
-        
+
         if (!data.title) { showToast('Judul wajib diisi!', 'error'); return; }
-        
+
         if (isSeries) {
             var episodes = getEpisodes();
             var embedOnly = [];
             var downloadOnly = [];
             var mirrorOnly = [];
             var subtitleOnly = [];
-            
+
             for (var i = 0; i < episodes.length; i++) {
                 var ep = episodes[i];
                 if (ep.embed) embedOnly.push({ ep: ep.ep, embed: ep.embed });
@@ -732,7 +732,7 @@ async function submitFilm(action) {
                 if (ep.mirror) mirrorOnly.push({ ep: ep.ep, mirror: ep.mirror });
                 if (ep.subtitle) subtitleOnly.push({ ep: ep.ep, subtitle: ep.subtitle });
             }
-            
+
             data.embed_url = embedOnly.length > 0 ? JSON.stringify(embedOnly) : '[]';
             data.download_url = downloadOnly.length > 0 ? JSON.stringify(downloadOnly) : '[]';
             data.mirror_url = mirrorOnly.length > 0 ? JSON.stringify(mirrorOnly) : '[]';
@@ -743,20 +743,20 @@ async function submitFilm(action) {
             data.mirror_url = document.getElementById('film-mirror')?.value.trim() || '';
             data.subtitle_url = document.getElementById('film-subtitle')?.value.trim() || '';
         }
-        
+
         if (action === 'draft') {
             localStorage.setItem('ps21_draft', JSON.stringify(data));
             showDraftStatus('draft');
             showToast('Draft tersimpan!', 'info');
             return;
         }
-        
+
         var btn = document.getElementById('btn-publish');
         if (btn) {
             btn.textContent = '⏳...';
             btn.disabled = true;
         }
-        
+
         var mode = document.getElementById('form-mode')?.value || 'add';
         var res;
         if (mode === 'edit') {
@@ -764,7 +764,7 @@ async function submitFilm(action) {
         } else {
             res = await DASHBOARD_API.add(data);
         }
-        
+
         if (res.status === 'success') {
             localStorage.removeItem('ps21_draft');
             showDraftStatus('published');
@@ -773,12 +773,12 @@ async function submitFilm(action) {
         } else {
             showToast('' + (res.message || 'Gagal'), 'error');
         }
-        
+
         if (btn) {
             btn.textContent = 'Rilis';
             btn.disabled = false;
         }
-        
+
     } catch (e) {
         console.error('ERROR:', e.message);
         showToast('Error: ' + e.message, 'error');
@@ -838,7 +838,7 @@ function loadDraftData(data) {
     setVal('film-poster', data.poster || '');
     setVal('film-backdrop', data.backdrop || '');
     setVal('film-trailer', data.trailer || '');
-    
+
     if (data.type === 'series') {
         if (typeof toggleSeriesPanel === 'function') toggleSeriesPanel();
         loadEpisodes(data.embed_url, data.download_url, data.mirror_url, data.subtitle_url);
@@ -848,7 +848,7 @@ function loadDraftData(data) {
         setVal('film-mirror', data.mirror_url || '');
         setVal('film-subtitle', data.subtitle_url || '');
     }
-    
+
     var featuredCheck = document.getElementById('film-featured');
     var popularCheck = document.getElementById('film-popular');
     if (featuredCheck) featuredCheck.checked = data.featured === 'TRUE';
@@ -925,12 +925,12 @@ async function initEditor() {
     var filmId = getParam('id');
     setupPreview('film-poster', 'poster-preview');
     setupPreview('film-backdrop', 'backdrop-preview');
-    
+
     var form = document.getElementById('film-form');
     if (form) {
         form.addEventListener('submit', function(e) { e.preventDefault(); });
     }
-    
+
     var titleEl = document.getElementById('film-title');
     var slugEl = document.getElementById('film-slug');
     var yearEl = document.getElementById('film-year');
@@ -966,12 +966,15 @@ async function initEditor() {
 // START DASHBOARD
 // =============================================
 
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('table-body')) {
-        setupFilters();
-        loadDashboard();
-    }
-    if (document.getElementById('film-form')) {
+if (document.getElementById('table-body')) {
+    document.addEventListener('DOMContentLoaded', function() { 
+        setupFilters(); 
+        loadDashboard(); 
+    });
+}
+
+if (document.getElementById('film-form')) {
+    document.addEventListener('DOMContentLoaded', function() {
         initEditor();
-    }
-});
+    });
+}
