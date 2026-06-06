@@ -966,15 +966,12 @@ async function initEditor() {
 // START DASHBOARD
 // =============================================
 
-if (document.getElementById('table-body')) {
-    document.addEventListener('DOMContentLoaded', function() { 
-        setupFilters(); 
-        loadDashboard(); 
-    });
-}
-
-if (document.getElementById('film-form')) {
-    document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('table-body')) {
+        setupFilters();
+        loadDashboard();
+    }
+    if (document.getElementById('film-form')) {
         initEditor();
-    });
-}
+    }
+});
