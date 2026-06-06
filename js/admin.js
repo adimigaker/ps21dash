@@ -147,8 +147,9 @@ function renderTable() {
 
         html += '<tr>';
         html += '<td style="width:28px;text-align:center;color:var(--admin-text3);font-size:0.75rem;">' + (start + i + 1) + '</td>';
+        var editUrl = 'editor.html?id=' + encodeURIComponent(film.id);
         html += '<td style="width:54px;">';
-        html += '<div class="cover-wrap">';
+        html += '<a href="' + editUrl + '" class="cover-wrap" style="display:block;text-decoration:none;">';
         if (film.poster) {
             html += '<img src="' + film.poster + '" class="table-poster" loading="lazy" onerror="this.style.opacity=0.2">';
         } else {
@@ -159,11 +160,11 @@ function renderTable() {
         if (isPopular) html += '<span class="cover-badge-icon popular" title="Popular"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>';
         html += '</div>';
         html += '<span class="cover-type ' + (film.type || 'movie') + '">' + (film.type === 'series' ? 'S' : 'M') + '</span>';
-        html += '</div></td>';
+        html += '</a></td>';
         html += '<td>';
-        html += '<div class="table-title">' + (film.title || '—');
+        html += '<a href="' + editUrl + '" class="table-title-link"><div class="table-title">' + (film.title || '—');
         if (isDraft) html += ' <span class="draft-badge">DRAFT</span>';
-        html += '</div>';
+        html += '</div></a>';
         html += '<div class="table-meta">';
         html += '<span>' + (film.year || '—') + '</span>';
         if (film.rating) html += '<span>&#9733; ' + film.rating + '</span>';
