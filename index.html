@@ -1,240 +1,94 @@
-// Dashboard API - Supabase Version (Standalone)
-var DASHBOARD_API = {
-    // ── Supabase Configuration ─────────────────────
-    _SUPABASE_URL: 'https://eogdtpkiwzlarllnxsrj.supabase.co',
-    _SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvZ2R0cGtpd3psYXJsbG54c3JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwODg0NzMsImV4cCI6MjA4OTY2NDQ3M30.eZPbYTuaDerKL9SOEa4ctkxSlU1PiEAU9l42czgYOyI',
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Pirate Studio 21</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&display=swap" rel="stylesheet">
+    
+    <!-- Dashboard CSS -->
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
 
-    // ── Helper: Supabase Client ─────────────────
-    _getClient: function() {
-        if (typeof supabase === 'undefined') {
-            console.error('Supabase library not loaded!');
-            return null;
-        }
-        return supabase.createClient(this._SUPABASE_URL, this._SUPABASE_ANON_KEY);
-    },
+    <!-- HEADER -->
+    <header class="admin-header">
+        <a href="index.html" class="admin-logo">
+            <span class="logo-red">PIRATE</span><span>STUDIO</span> 21
+        </a>
+        <div class="admin-header-right">
+            <span class="admin-badge">DASHBOARD</span>
+            <a href="../index.html" class="admin-link" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-top:-2px;"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg> Lihat Situs</a>
+        </div>
+    </header>
 
-    // ── Helper: Format dari Editor ke Supabase ────────
-    _toSupabaseFormat: function(film) {
-        var formatted = {};
-        formatted.id = film.id;
-        formatted.title = film.title;
-        formatted.slug = film.slug;
-        formatted.type = film.type;
-        formatted.featured = film.featured === 'TRUE' || film.featured === true;
-        formatted.popular = film.popular === 'TRUE' || film.popular === true;
-        formatted.year = parseInt(film.year) || null;
-        formatted.genre = film.genre;
-        formatted.rating = parseFloat(film.rating) || null;
-        formatted.duration = film.duration;
-        formatted.director = film.director;
-        formatted.cast = film.cast;
-        formatted.poster = film.poster;
-        formatted.backdrop = film.backdrop;
-        formatted.synopsis = film.synopsis;
-        formatted.trailer = film.trailer;
-        
-        // Handle URL fields
-        if (film.type === 'series') {
-            // Untuk series: simpan sebagai JSON string (text) - langsung pakai dari editor
-            formatted.embed_url = film.embed_url || '[]';
-            formatted.download_url = film.download_url || '[]';
-            formatted.mirror_url = film.mirror_url || '[]';
-            formatted.subtitle_url = film.subtitle_url || '[]';
-        } else {
-            // Untuk movie: string biasa
-            formatted.embed_url = film.embed_url || '';
-            formatted.download_url = film.download_url || '';
-            formatted.mirror_url = film.mirror_url || '';
-            formatted.subtitle_url = film.subtitle_url || '';
-        }
-        
-        return formatted;
-    },
+    <!-- FILTER BAR -->
+    <div class="admin-toolbar">
+        <div class="toolbar-left">
+            <input type="text" id="search-input" class="admin-input" placeholder="Cari film...">
+            <select id="filter-type" class="admin-select">
+                <option value="all">Semua Tipe</option>
+                <option value="movie">Movie</option>
+                <option value="series">Series</option>
+            </select>
+            <select id="filter-genre" class="admin-select">
+                <option value="all">Semua Genre</option>
+            </select>
+        </div>
+        <div class="toolbar-right" style="display:flex;gap:8px;flex-shrink:0;align-items:center;flex-wrap:nowrap;">
+            <button class="admin-btn admin-btn-primary" style="white-space:nowrap;" onclick="window.location.href='editor.html'">
+                + Tambah Film
+            </button>
+            <a href="galeri.html" class="admin-btn admin-btn-secondary" style="white-space:nowrap;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>
+                </svg>
+                Galeri
+            </a>
+        </div>
+    </div>
 
-    // ── Helper: Format dari Supabase ke Editor ────────
-    _fromSupabaseFormat: function(film) {
-        var formatted = {};
-        formatted.id = film.id;
-        formatted.title = film.title;
-        formatted.slug = film.slug;
-        formatted.type = film.type;
-        formatted.featured = film.featured ? 'TRUE' : 'FALSE';
-        formatted.popular = film.popular ? 'TRUE' : 'FALSE';
-        formatted.year = film.year;
-        formatted.genre = film.genre;
-        formatted.rating = film.rating;
-        formatted.duration = film.duration;
-        formatted.director = film.director;
-        formatted.cast = film.cast;
-        formatted.poster = film.poster;
-        formatted.backdrop = film.backdrop;
-        formatted.synopsis = film.synopsis;
-        formatted.trailer = film.trailer;
-        
-        // Untuk series: data dari Supabase sudah dalam format JSON string (text)
-        // Langsung kirim ke editor apa adanya
-        if (film.type === 'series') {
-            formatted.embed_url = film.embed_url || '[]';
-            formatted.download_url = film.download_url || '[]';
-            formatted.mirror_url = film.mirror_url || '[]';
-            formatted.subtitle_url = film.subtitle_url || '[]';
-        } else {
-            formatted.embed_url = film.embed_url || '';
-            formatted.download_url = film.download_url || '';
-            formatted.mirror_url = film.mirror_url || '';
-            formatted.subtitle_url = film.subtitle_url || '';
-        }
-        
-        return formatted;
-    },
+    <!-- STATS -->
+    <div class="admin-stats" id="stats-bar">
+        <div class="stat-item">
+            <span class="stat-number" id="stat-total">0</span>
+            <span class="stat-label">Total Film</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" id="stat-movies">0</span>
+            <span class="stat-label">Movies</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-number" id="stat-series">0</span>
+            <span class="stat-label">Series</span>
+        </div>
+    </div>
 
-    // ── CRUD Operations ──────────────────────────
-    getAll: async function() {
-        var client = this._getClient();
-        if (!client) return { status: 'error', message: 'Supabase client error' };
-        
-        var { data, error } = await client
-            .from('PirateStudio21_DB')
-            .select('*')
-            .order('year', { ascending: false });
-        
-        if (error) return { status: 'error', message: error.message };
-        var films = data.map(this._fromSupabaseFormat);
-        return { status: 'success', data: films };
-    },
+    <!-- TABLE -->
+    <div class="admin-table-wrap">
+        <table class="admin-table" id="film-table">
+            <thead><tr><th width="28">#</th><th width="54">Cover</th><th>Judul &amp; Info</th><th width="76">Aksi</th></tr></thead>
+            <tbody id="table-body">
+                <tr>
+                    <td colspan="4" class="table-loading">Memuat data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-    getById: async function(id) {
-        var client = this._getClient();
-        if (!client) return { status: 'error', message: 'Supabase client error' };
-        
-        var { data, error } = await client
-            .from('PirateStudio21_DB')
-            .select('*')
-            .eq('id', id)
-            .single();
-        
-        if (error) return { status: 'error', message: error.message };
-        var film = this._fromSupabaseFormat(data);
-        return { status: 'success', data: film };
-    },
+    <!-- PAGINATION -->
+    <div class="admin-pagination" id="pagination"></div>
 
-    search: async function(q) {
-        if (!q || q.trim() === '') return { status: 'success', data: [] };
-        
-        var client = this._getClient();
-        if (!client) return { status: 'error', message: 'Supabase client error' };
-        
-        var searchTerm = '%' + q.toLowerCase() + '%';
-        var { data, error } = await client
-            .from('PirateStudio21_DB')
-            .select('*')
-            .or(`title.ilike.${searchTerm},genre.ilike.${searchTerm}`);
-        
-        if (error) return { status: 'error', message: error.message };
-        var films = data.map(this._fromSupabaseFormat);
-        return { status: 'success', data: films };
-    },
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
 
-    add: async function(data) {
-        var client = this._getClient();
-        if (!client) return { status: 'error', message: 'Supabase client error' };
-        
-        var formatted = this._toSupabaseFormat(data);
-        
-        var { error } = await client
-            .from('PirateStudio21_DB')
-            .insert([formatted]);
-        
-        if (error) return { status: 'error', message: error.message };
-        
-        if (typeof API !== 'undefined' && API.clearCache) API.clearCache();
-        
-        return { status: 'success', message: 'Film berhasil ditambahkan' };
-    },
-
-    update: async function(data) {
-        var client = this._getClient();
-        if (!client) return { status: 'error', message: 'Supabase client error' };
-        
-        var formatted = this._toSupabaseFormat(data);
-        
-        var { error } = await client
-            .from('PirateStudio21_DB')
-            .update(formatted)
-            .eq('id', data.id);
-        
-        if (error) return { status: 'error', message: error.message };
-        
-        if (typeof API !== 'undefined' && API.clearCache) API.clearCache();
-        
-        return { status: 'success', message: 'Film berhasil diupdate' };
-    },
-
-    delete: async function(id) {
-        var client = this._getClient();
-        if (!client) return { status: 'error', message: 'Supabase client error' };
-        
-        var { error } = await client
-            .from('PirateStudio21_DB')
-            .delete()
-            .eq('id', id);
-        
-        if (error) return { status: 'error', message: error.message };
-        
-        if (typeof API !== 'undefined' && API.clearCache) API.clearCache();
-        
-        return { status: 'success', message: 'Film berhasil dihapus' };
-    },
-
-    // ── Google Drive Upload ──────────────────────────
-    _APPSCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxNamdlH6zSVDK_-eC6KWYjb6E2Ob3ivI2kcZRD9XkwxKleb0bTZbKT8xXhQPVsgv0P/exec',
-
-    uploadImage: function(file) {
-        return new Promise(function(resolve) {
-            var reader = new FileReader();
-            reader.onload = async function() {
-                try {
-                    var base64 = reader.result.split(',')[1];
-                    var ext = (file.name || 'img').split('.').pop() || 'jpg';
-                    var fileName = 'ps21_' + Date.now() + '.' + ext;
-                    
-                    var response = await fetch(DASHBOARD_API._APPSCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain' },
-                        body: JSON.stringify({
-                            action: 'uploadImage',
-                            image: base64,
-                            fileName: fileName,
-                            mimeType: file.type || 'image/jpeg'
-                        })
-                    });
-                    resolve(await response.json());
-                } catch (err) {
-                    resolve({ status: 'error', message: err.message });
-                }
-            };
-            reader.readAsDataURL(file);
-        });
-    },
-
-    fetchGET: async function(action, params) {
-        params = params || {};
-        var url = this._APPSCRIPT_URL + '?action=' + encodeURIComponent(action);
-        for (var key in params) {
-            if (params[key] !== undefined && params[key] !== null && params[key] !== '') {
-                url += '&' + encodeURIComponent(key) + '=' + encodeURIComponent(params[key]);
-            }
-        }
-        try {
-            var response = await fetch(url);
-            return await response.json();
-        } catch (error) {
-            console.error('❌ GET Error:', error);
-            return { status: 'error', message: 'Gagal terhubung ke server' };
-        }
-    },
-
-    listImages: function() {
-        return this.fetchGET('listImages');
-    }
-};
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
