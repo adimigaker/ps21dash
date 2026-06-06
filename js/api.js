@@ -32,7 +32,7 @@ var DASHBOARD_API = {
         formatted.backdrop = film.backdrop;
         formatted.synopsis = film.synopsis;
         formatted.trailer = film.trailer;
-        
+
         // Handle URL fields
         if (film.type === 'series') {
             // Untuk series: simpan sebagai JSON string (text) - langsung pakai dari editor
@@ -47,7 +47,7 @@ var DASHBOARD_API = {
             formatted.mirror_url = film.mirror_url || '';
             formatted.subtitle_url = film.subtitle_url || '';
         }
-        
+
         return formatted;
     },
 
@@ -70,7 +70,7 @@ var DASHBOARD_API = {
         formatted.backdrop = film.backdrop;
         formatted.synopsis = film.synopsis;
         formatted.trailer = film.trailer;
-        
+
         // Untuk series: data dari Supabase sudah dalam format JSON string (text)
         // Langsung kirim ke editor apa adanya
         if (film.type === 'series') {
@@ -84,7 +84,7 @@ var DASHBOARD_API = {
             formatted.mirror_url = film.mirror_url || '';
             formatted.subtitle_url = film.subtitle_url || '';
         }
-        
+
         return formatted;
     },
 
@@ -92,12 +92,12 @@ var DASHBOARD_API = {
     getAll: async function() {
         var client = this._getClient();
         if (!client) return { status: 'error', message: 'Supabase client error' };
-        
+
         var { data, error } = await client
             .from('PirateStudio21_DB')
             .select('*')
             .order('year', { ascending: false });
-        
+
         if (error) return { status: 'error', message: error.message };
         var films = data.map(this._fromSupabaseFormat);
         return { status: 'success', data: films };
@@ -106,13 +106,13 @@ var DASHBOARD_API = {
     getById: async function(id) {
         var client = this._getClient();
         if (!client) return { status: 'error', message: 'Supabase client error' };
-        
+
         var { data, error } = await client
             .from('PirateStudio21_DB')
             .select('*')
             .eq('id', id)
             .single();
-        
+
         if (error) return { status: 'error', message: error.message };
         var film = this._fromSupabaseFormat(data);
         return { status: 'success', data: film };
@@ -120,16 +120,16 @@ var DASHBOARD_API = {
 
     search: async function(q) {
         if (!q || q.trim() === '') return { status: 'success', data: [] };
-        
+
         var client = this._getClient();
         if (!client) return { status: 'error', message: 'Supabase client error' };
-        
+
         var searchTerm = '%' + q.toLowerCase() + '%';
         var { data, error } = await client
             .from('PirateStudio21_DB')
             .select('*')
             .or(`title.ilike.${searchTerm},genre.ilike.${searchTerm}`);
-        
+
         if (error) return { status: 'error', message: error.message };
         var films = data.map(this._fromSupabaseFormat);
         return { status: 'success', data: films };
@@ -138,51 +138,51 @@ var DASHBOARD_API = {
     add: async function(data) {
         var client = this._getClient();
         if (!client) return { status: 'error', message: 'Supabase client error' };
-        
+
         var formatted = this._toSupabaseFormat(data);
-        
+
         var { error } = await client
             .from('PirateStudio21_DB')
             .insert([formatted]);
-        
+
         if (error) return { status: 'error', message: error.message };
-        
+
         if (typeof API !== 'undefined' && API.clearCache) API.clearCache();
-        
+
         return { status: 'success', message: 'Film berhasil ditambahkan' };
     },
 
     update: async function(data) {
         var client = this._getClient();
         if (!client) return { status: 'error', message: 'Supabase client error' };
-        
+
         var formatted = this._toSupabaseFormat(data);
-        
+
         var { error } = await client
             .from('PirateStudio21_DB')
             .update(formatted)
             .eq('id', data.id);
-        
+
         if (error) return { status: 'error', message: error.message };
-        
+
         if (typeof API !== 'undefined' && API.clearCache) API.clearCache();
-        
+
         return { status: 'success', message: 'Film berhasil diupdate' };
     },
 
     delete: async function(id) {
         var client = this._getClient();
         if (!client) return { status: 'error', message: 'Supabase client error' };
-        
+
         var { error } = await client
             .from('PirateStudio21_DB')
             .delete()
             .eq('id', id);
-        
+
         if (error) return { status: 'error', message: error.message };
-        
+
         if (typeof API !== 'undefined' && API.clearCache) API.clearCache();
-        
+
         return { status: 'success', message: 'Film berhasil dihapus' };
     },
 
@@ -197,7 +197,7 @@ var DASHBOARD_API = {
                     var base64 = reader.result.split(',')[1];
                     var ext = (file.name || 'img').split('.').pop() || 'jpg';
                     var fileName = 'ps21_' + Date.now() + '.' + ext;
-                    
+
                     var response = await fetch(DASHBOARD_API._APPSCRIPT_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain' },
