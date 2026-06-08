@@ -17,7 +17,6 @@
     .media-upload-btn:hover { background:#e50914; color:#fff; border-color:#e50914; }
     .media-upload-btn:disabled { opacity:0.5; cursor:not-allowed; }
 
-    /* Episode panel */
     .episode-list { display:flex; flex-direction:column; gap:10px; }
     .episode-item { background:#16161f; border:1px solid #2a2a3a; border-radius:10px; padding:12px; position:relative; }
     .episode-item-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; gap:8px; }
@@ -83,8 +82,7 @@
     .episode-action-btn.insert-above:hover { color: #f39c12; }
     .episode-action-btn.delete:hover { color: #e50914; }
 
-    /* Style untuk input datetime-local */
-    input[type="datetime-local"] {
+    input[type="text"], input[type="number"], select, textarea {
         background: #0d0d14;
         border: 1px solid #2a2a3a;
         color: #fff;
@@ -92,7 +90,7 @@
         padding: 8px 10px;
         font-family: inherit;
     }
-    input[type="datetime-local"]:focus {
+    input:focus, select:focus, textarea:focus {
         outline: none;
         border-color: var(--admin-accent, #e50914);
     }
@@ -233,7 +231,7 @@
                     </div>
                 </div>
 
-                <!-- MOVIE: input URL tunggal -->
+                <!-- MOVIE -->
                 <div id="panel-movie">
                     <div class="form-group">
                         <label for="film-embed">URL Embed</label>
@@ -253,7 +251,7 @@
                     </div>
                 </div>
 
-                <!-- SERIES: panel episode dinamis -->
+                <!-- SERIES -->
                 <div id="panel-series" style="display:none;">
                     <div class="form-group">
                         <label>
@@ -298,7 +296,7 @@
                 <small style="color:#8888aa;">* Featured bisa lebih dari satu — hero akan tampil secara acak.</small>
             </div>
 
-            <!-- UPDATE TERAKHIR -->
+            <!-- UPDATE TERAKHIR (DEBUG - Text biasa) -->
             <div class="form-section">
                 <h3 class="form-section-title">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -306,13 +304,14 @@
                 </h3>
                 <div class="form-group">
                     <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <input type="datetime-local" id="film-updated_at" style="flex: 1; min-width: 200px;">
-                        <button type="button" class="admin-btn admin-btn-sm" onclick="setUpdatedAtNow()" style="white-space: nowrap; background: #2a2a3a; border: 1px solid #3a3a4a; color: #fff;">
+                        <input type="text" id="film-updated_at_text" readonly style="flex: 1; background: #0d0d14; border: 1px solid #2a2a3a; color: #fff; border-radius: 7px; padding: 8px 10px; font-family: monospace;">
+                        <button type="button" class="admin-btn admin-btn-sm" onclick="setUpdatedAtNowText()" style="white-space: nowrap; background: #2a2a3a; border: 1px solid #3a3a4a; color: #fff;">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             NOW
                         </button>
                     </div>
-                    <small style="color:#8888aa;">Kosongkan untuk otomatis (hanya berubah jika embed_url diupdate), atau atur manual.</small>
+                    <small style="color:#8888aa;">Nilai dari database: <span id="debug-updated_at" style="color:#e50914;">-</span></small>
+                    <small style="display:block; margin-top:4px;">Kosongkan untuk otomatis (hanya berubah jika embed_url diupdate), atau atur manual.</small>
                 </div>
             </div>
 
@@ -346,7 +345,6 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             initEditor();
-            // Toggle panel movie/series saat type berubah
             var typeEl = document.getElementById('film-type');
             if (typeEl) {
                 typeEl.addEventListener('change', toggleSeriesPanel);
@@ -359,19 +357,6 @@
             var isSeries = type === 'series';
             document.getElementById('panel-movie').style.display = isSeries ? 'none' : 'block';
             document.getElementById('panel-series').style.display = isSeries ? 'block' : 'none';
-        }
-
-        // Fungsi untuk set updated_at ke waktu sekarang
-        function setUpdatedAtNow() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
-            document.getElementById('film-updated_at').value = datetimeLocal;
         }
     </script>
 </body>
