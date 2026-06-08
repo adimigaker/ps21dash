@@ -66,22 +66,9 @@ function formatUpdatedAtForDB(datetimeLocal) {
 
 function formatUpdatedAtForInput(isoString) {
     if (!isoString) return '';
-    // Parse ISO string: "2026-06-08T07:30:00.000Z" atau "2026-06-08 07:30:00+07"
-    const date = new Date(isoString);
-    if (!isNaN(date.getTime())) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    }
-    // Fallback untuk format lama
-    const match = isoString.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2})/);
-    if (match) {
-        return `${match[1]}T${match[2]}`;
-    }
-    return '';
+    // Format: "2026-06-08 13:07:13.9694+07" -> "2026-06-08T13:07"
+    let formatted = isoString.replace(' ', 'T').substring(0, 16);
+    return formatted;
 }
 
 // =============================================
@@ -94,7 +81,7 @@ async function loadDashboard() {
         console.error('table-body not found');
         return;
     }
-    tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">Memuat data...</td></td>';
+    tableBody.innerHTML = '<td><td colspan="4" class="table-loading">Memuat data...</td></tr>';
     try {
         if (typeof DASHBOARD_API === 'undefined') {
             throw new Error('DASHBOARD_API tidak terdefinisi - cek api.js');
@@ -188,11 +175,12 @@ function renderTable() {
         var isDraft = film.status === 'draft';
         var isFeatured = film.featured === 'TRUE';
         var isPopular = film.popular === 'TRUE';
+        var editUrl = 'editor.html?id=' + encodeURIComponent(film.id);
 
         html += '<tr>';
         html += '<td style="width:28px;text-align:center;color:var(--admin-text3);font-size:0.75rem;">' + (start + i + 1) + '</td>';
         html += '<td style="width:54px;">';
-        html += '<div class="cover-wrap">';
+        html += '<a href="' + editUrl + '" class="cover-wrap" style="display:block;text-decoration:none;">';
         if (film.poster) {
             html += '<img src="' + film.poster + '" class="table-poster" loading="lazy" onerror="this.style.opacity=0.2">';
         } else {
@@ -203,8 +191,10 @@ function renderTable() {
         if (isPopular) html += '<span class="cover-badge-icon popular" title="Popular"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></span>';
         html += '</div>';
         html += '<span class="cover-type ' + (film.type || 'movie') + '">' + (film.type === 'series' ? 'S' : 'M') + '</span>';
-        html += '</div></td>';
-        html += '<td>';
+        html += '</a>';
+        html += '</td>';
+        html += '<tr>';
+        html += '<a href="' + editUrl + '" class="table-title-link" style="text-decoration:none;">';
         html += '<div class="table-title">' + (film.title || '—');
         if (isDraft) html += ' <span class="draft-badge">DRAFT</span>';
         html += '</div>';
@@ -214,12 +204,14 @@ function renderTable() {
         if (genres.length > 0) html += '<span>' + genres.slice(0,2).join(', ') + (genres.length > 2 ? '...' : '') + '</span>';
         html += '</div>';
         html += '<div style="font-size:0.68rem;color:var(--admin-text3);margin-top:2px;">' + (film.id || '') + '</div>';
+        html += '</a>';
         html += '</td>';
         html += '<td style="width:76px;">';
         html += '<div class="table-actions">';
-        html += '<a href="editor.html?id=' + encodeURIComponent(film.id) + '" class="admin-btn admin-btn-sm admin-btn-secondary" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>';
+        html += '<a href="' + editUrl + '" class="admin-btn admin-btn-sm admin-btn-secondary" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>';
         html += '<button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteFilmById(\'' + film.id.replace(/'/g, "\\'") + '\')" title="Hapus"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>';
-        html += '</div></td>';
+        html += '</div>';
+        html += '</td>';
         html += '</tr>';
     }
     tbody.innerHTML = html;
@@ -321,29 +313,25 @@ function createEpisodeElement(data) {
 // EPISODE MANAGEMENT - FIXED VERSION
 // =============================================
 
-// Tambah episode di BAWAH (C+1 = copy dari D, D tetap 4, E tetap 5)
+// Tambah episode di BAWAH
 function addEpisodeBelow(btn) {
     var episodeItem = btn.closest('.episode-item');
     var container = document.getElementById('episode-list');
     var currentNum = parseInt(episodeItem.dataset.ep);
     var newNum = currentNum + 1;
 
-    // Ambil episode AFTER current (yaitu D) untuk di-copy nilainya
     var nextItem = episodeItem.nextSibling;
     var nextEpisodeData = null;
 
     if (nextItem) {
-        // Jika ada episode D, copy nilainya
         nextEpisodeData = {
-            ep: newNum,  // nomor baru C+1
+            ep: newNum,
             embed: nextItem.querySelector('.ep-embed')?.value || '',
             download: nextItem.querySelector('.ep-download')?.value || '',
             mirror: nextItem.querySelector('.ep-mirror')?.value || '',
             subtitle: nextItem.querySelector('.ep-subtitle')?.value || ''
         };
     } else {
-        // Jika tidak ada episode D (berarti ini episode terakhir)
-        // Maka episode baru kosong
         nextEpisodeData = {
             ep: newNum,
             embed: '',
@@ -355,18 +343,14 @@ function addEpisodeBelow(btn) {
 
     var newDiv = createEpisodeElement(nextEpisodeData);
 
-    // Insert setelah episode saat ini (C)
     if (nextItem) {
         container.insertBefore(newDiv, nextItem);
     } else {
         container.appendChild(newDiv);
     }
 
-    // ✅ TIDAK menggeser episode D, E, dll
-    // Hanya update episodeCount tanpa sorting ulang
     episodeCount = document.querySelectorAll('.episode-item').length;
 
-    // Scroll ke episode baru
     setTimeout(function() {
         newDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         newDiv.style.transition = 'background 0.3s';
@@ -377,7 +361,7 @@ function addEpisodeBelow(btn) {
     }, 50);
 }
 
-// Sisipkan episode di ATAS (C-1 = copy dari B, B tetap 2)
+// Sisipkan episode di ATAS
 function insertEpisodeAbove(btn) {
     var episodeItem = btn.closest('.episode-item');
     var container = document.getElementById('episode-list');
@@ -389,22 +373,18 @@ function insertEpisodeAbove(btn) {
         return;
     }
 
-    // Ambil episode BEFORE current (yaitu B) untuk di-copy nilainya
     var prevItem = episodeItem.previousSibling;
     var prevEpisodeData = null;
 
     if (prevItem) {
-        // Jika ada episode B, copy nilainya
         prevEpisodeData = {
-            ep: newNum,  // nomor baru C-1
+            ep: newNum,
             embed: prevItem.querySelector('.ep-embed')?.value || '',
             download: prevItem.querySelector('.ep-download')?.value || '',
             mirror: prevItem.querySelector('.ep-mirror')?.value || '',
             subtitle: prevItem.querySelector('.ep-subtitle')?.value || ''
         };
     } else {
-        // Jika tidak ada episode B (berarti ini episode pertama)
-        // Maka episode baru kosong
         prevEpisodeData = {
             ep: newNum,
             embed: '',
@@ -415,16 +395,10 @@ function insertEpisodeAbove(btn) {
     }
 
     var newDiv = createEpisodeElement(prevEpisodeData);
-
-    // Insert SEBELUM episode saat ini (C)
     container.insertBefore(newDiv, episodeItem);
-
-    // ✅ TIDAK menggeser episode C, D, E, dll
-    // Episode C tetap bernomor sama, tidak berubah
 
     episodeCount = document.querySelectorAll('.episode-item').length;
 
-    // Scroll ke episode baru
     setTimeout(function() {
         newDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         newDiv.style.transition = 'background 0.3s';
@@ -435,7 +409,7 @@ function insertEpisodeAbove(btn) {
     }, 50);
 }
 
-// Tambah episode global (di akhir: C+1)
+// Tambah episode global (di akhir)
 function addEpisodeToEnd() {
     var container = document.getElementById('episode-list');
     if (!container) return;
@@ -461,7 +435,6 @@ function addEpisodeToEnd() {
 
     episodeCount = items.length + 1;
 
-    // Scroll ke episode baru (tanpa pindah ke atas dulu)
     setTimeout(function() {
         newDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         newDiv.style.transition = 'background 0.3s';
@@ -483,7 +456,6 @@ function updateEpisodeNumberDisplay(item, newNum) {
     }
 }
 
-// Hapus episode - episode di bawahnya TIDAK berubah nomornya
 function removeEpisode(btn) {
     var item = btn.closest('.episode-item');
     var nextItem = item.nextSibling;
@@ -493,7 +465,6 @@ function removeEpisode(btn) {
 
     episodeCount = document.querySelectorAll('.episode-item').length;
 
-    // Scroll ke episode terdekat (tanpa pindah ke atas dulu)
     if (scrollTarget) {
         setTimeout(function() {
             scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -540,7 +511,6 @@ function saveEpisodeNumber(btn) {
     var episodeItem = numArea.closest('.episode-item');
     episodeItem.dataset.ep = newNum;
 
-    // Kembalikan ke tampilan teks
     numArea.dataset.editing = 'false';
     numArea.innerHTML = [
         '<span class="episode-num-text">Episode ' + newNum + '</span>',
@@ -561,7 +531,6 @@ function sortEpisodesByNumber() {
         return parseInt(a.dataset.ep) - parseInt(b.dataset.ep);
     });
 
-    // Simpan posisi scroll saat ini
     var scrollContainer = container.parentElement;
     var scrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
 
@@ -569,7 +538,6 @@ function sortEpisodesByNumber() {
         container.appendChild(items[i]);
     }
 
-    // Kembalikan posisi scroll
     if (scrollContainer) {
         scrollContainer.scrollTop = scrollTop;
     }
@@ -667,7 +635,6 @@ function loadEpisodes(embedData, downloadData, mirrorData, subtitleData) {
     }
 }
 
-// Override untuk tombol "Tambah Episode" di bawah
 window.addEpisode = function(data) {
     addEpisodeToEnd();
 };
