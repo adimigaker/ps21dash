@@ -32,16 +32,19 @@ var DASHBOARD_API = {
         formatted.backdrop = film.backdrop;
         formatted.synopsis = film.synopsis;
         formatted.trailer = film.trailer;
+        
+        // Tambahkan updated_at
+        if (film.updated_at) {
+            formatted.updated_at = film.updated_at;
+        }
 
         // Handle URL fields
         if (film.type === 'series') {
-            // Untuk series: simpan sebagai JSON string (text) - langsung pakai dari editor
             formatted.embed_url = film.embed_url || '[]';
             formatted.download_url = film.download_url || '[]';
             formatted.mirror_url = film.mirror_url || '[]';
             formatted.subtitle_url = film.subtitle_url || '[]';
         } else {
-            // Untuk movie: string biasa
             formatted.embed_url = film.embed_url || '';
             formatted.download_url = film.download_url || '';
             formatted.mirror_url = film.mirror_url || '';
@@ -70,9 +73,11 @@ var DASHBOARD_API = {
         formatted.backdrop = film.backdrop;
         formatted.synopsis = film.synopsis;
         formatted.trailer = film.trailer;
+        
+        // Tambahkan updated_at
+        formatted.updated_at = film.updated_at || null;
 
         // Untuk series: data dari Supabase sudah dalam format JSON string (text)
-        // Langsung kirim ke editor apa adanya
         if (film.type === 'series') {
             formatted.embed_url = film.embed_url || '[]';
             formatted.download_url = film.download_url || '[]';
