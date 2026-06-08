@@ -297,23 +297,23 @@
             </div>
 
             <!-- UPDATE TERAKHIR (DEBUG - Text biasa) -->
-            <div class="form-section">
-                <h3 class="form-section-title">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                    Update Terakhir
-                </h3>
-                <div class="form-group">
-                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        <input type="text" id="film-updated_at_text" readonly style="flex: 1; background: #0d0d14; border: 1px solid #2a2a3a; color: #fff; border-radius: 7px; padding: 8px 10px; font-family: monospace;">
-                        <button type="button" class="admin-btn admin-btn-sm" onclick="setUpdatedAtNowText()" style="white-space: nowrap; background: #2a2a3a; border: 1px solid #3a3a4a; color: #fff;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            NOW
-                        </button>
-                    </div>
-                    <small style="color:#8888aa;">Nilai dari database: <span id="debug-updated_at" style="color:#e50914;">-</span></small>
-                    <small style="display:block; margin-top:4px;">Kosongkan untuk otomatis (hanya berubah jika embed_url diupdate), atau atur manual.</small>
-                </div>
-            </div>
+            <!-- UPDATE TERAKHIR -->
+<div class="form-section">
+    <h3 class="form-section-title">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Update Terakhir
+    </h3>
+    <div class="form-group">
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <input type="datetime-local" id="film-updated_at" style="flex: 1; background: #0d0d14; border: 1px solid #2a2a3a; color: #fff; border-radius: 7px; padding: 8px 10px;">
+            <button type="button" class="admin-btn admin-btn-sm" onclick="setUpdatedAtNow()" style="white-space: nowrap; background: #2a2a3a; border: 1px solid #3a3a4a; color: #fff;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                NOW
+            </button>
+        </div>
+        <small style="color:#8888aa;">Kosongkan untuk otomatis (hanya berubah jika embed_url diupdate), atau atur manual.</small>
+    </div>
+</div>
 
             <!-- TOMBOL AKSI -->
             <div class="form-actions">
