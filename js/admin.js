@@ -61,11 +61,22 @@ function setUpdatedAtNow() {
 function formatUpdatedAtForDB(datetimeLocal) {
     if (!datetimeLocal) return null;
     const [date, time] = datetimeLocal.split('T');
-    return `${date} ${time}:00+07`;
+    return `${date} ${time}:00`;
 }
 
 function formatUpdatedAtForInput(isoString) {
     if (!isoString) return '';
+    // Parse ISO string: "2026-06-08T07:30:00.000Z" atau "2026-06-08 07:30:00+07"
+    const date = new Date(isoString);
+    if (!isNaN(date.getTime())) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    // Fallback untuk format lama
     const match = isoString.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2})/);
     if (match) {
         return `${match[1]}T${match[2]}`;
