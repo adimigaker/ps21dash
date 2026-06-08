@@ -41,6 +41,39 @@ function setVal(id, value) {
 }
 
 // =============================================
+// UPDATED_AT HELPER FUNCTIONS
+// =============================================
+
+function setUpdatedAtNow() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+    const input = document.getElementById('film-updated_at');
+    if (input) input.value = datetimeLocal;
+    showToast('Waktu diatur ke sekarang', 'info');
+}
+
+function formatUpdatedAtForDB(datetimeLocal) {
+    if (!datetimeLocal) return null;
+    const [date, time] = datetimeLocal.split('T');
+    return `${date} ${time}:00+07`;
+}
+
+function formatUpdatedAtForInput(isoString) {
+    if (!isoString) return '';
+    const match = isoString.match(/^(\d{4}-\d{2}-\d{2})\s(\d{2}:\d{2})/);
+    if (match) {
+        return `${match[1]}T${match[2]}`;
+    }
+    return '';
+}
+
+// =============================================
 // DASHBOARD TABLE FUNCTIONS
 // =============================================
 
@@ -50,7 +83,7 @@ async function loadDashboard() {
         console.error('table-body not found');
         return;
     }
-    tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">Memuat data...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">Memuat data...</td></td>';
     try {
         if (typeof DASHBOARD_API === 'undefined') {
             throw new Error('DASHBOARD_API tidak terdefinisi - cek api.js');
@@ -656,6 +689,12 @@ async function loadFilmData(id) {
         setVal('film-backdrop', f.backdrop);
         setVal('film-trailer', f.trailer);
 
+        // Load updated_at ke input datetime-local
+        const updatedAtInput = document.getElementById('film-updated_at');
+        if (updatedAtInput && f.updated_at) {
+            updatedAtInput.value = formatUpdatedAtForInput(f.updated_at);
+        }
+
         var featuredCheck = document.getElementById('film-featured');
         var popularCheck = document.getElementById('film-popular');
         if (featuredCheck) featuredCheck.checked = f.featured === 'TRUE';
@@ -715,6 +754,12 @@ async function submitFilm(action) {
             popular: document.getElementById('film-popular')?.checked ? 'TRUE' : 'FALSE',
             status: action === 'publish' ? 'published' : 'draft'
         };
+
+        // Ambil updated_at dari form jika diisi manual
+        const updatedAtInput = document.getElementById('film-updated_at');
+        if (updatedAtInput && updatedAtInput.value) {
+            data.updated_at = formatUpdatedAtForDB(updatedAtInput.value);
+        }
 
         if (!data.title) { showToast('Judul wajib diisi!', 'error'); return; }
 
@@ -838,6 +883,14 @@ function loadDraftData(data) {
     setVal('film-poster', data.poster || '');
     setVal('film-backdrop', data.backdrop || '');
     setVal('film-trailer', data.trailer || '');
+
+    // Load updated_at dari draft
+    if (data.updated_at) {
+        const updatedAtInput = document.getElementById('film-updated_at');
+        if (updatedAtInput) {
+            updatedAtInput.value = formatUpdatedAtForInput(data.updated_at);
+        }
+    }
 
     if (data.type === 'series') {
         if (typeof toggleSeriesPanel === 'function') toggleSeriesPanel();
