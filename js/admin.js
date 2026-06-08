@@ -44,24 +44,32 @@ function setVal(id, value) {
 // UPDATED_AT HELPER FUNCTIONS
 // =============================================
 
-function setUpdatedAtNowText() {
+function setUpdatedAtNow() {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
     
-    const formatted = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
-    var input = document.getElementById('film-updated_at_text');
-    if (input) input.value = formatted;
+    const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+    const input = document.getElementById('film-updated_at');
+    if (input) input.value = datetimeLocal;
     showToast('Waktu diatur ke sekarang', 'info');
 }
 
-function formatUpdatedAtForDB(datetimeStr) {
-    if (!datetimeStr) return null;
-    return datetimeStr;
+function formatUpdatedAtForDB(datetimeLocal) {
+    if (!datetimeLocal) return null;
+    const [date, time] = datetimeLocal.split('T');
+    return `${date} ${time}:00`;
+}
+
+function formatUpdatedAtForInput(isoString) {
+    if (!isoString) return '';
+    var cleaned = isoString.replace('T', ' ');
+    var datePart = cleaned.substring(0, 10);
+    var timePart = cleaned.substring(11, 16);
+    return datePart + 'T' + timePart;
 }
 
 // =============================================
@@ -660,21 +668,10 @@ async function loadFilmData(id) {
         setVal('film-backdrop', f.backdrop);
         setVal('film-trailer', f.trailer);
 
-        // DEBUG: Load updated_at
-        var debugSpan = document.getElementById('debug-updated_at');
-        var textInput = document.getElementById('film-updated_at_text');
-
-        if (debugSpan) {
-            debugSpan.textContent = f.updated_at ? f.updated_at : '(null)';
-            console.log('updated_at from DB:', f.updated_at);
-        }
-
-        if (textInput && f.updated_at) {
-            var displayValue = f.updated_at;
-            if (displayValue.includes('T')) {
-                displayValue = displayValue.replace('T', ' ').substring(0, 19);
-            }
-            textInput.value = displayValue;
+        // Load updated_at ke input datetime-local
+        const updatedAtInput = document.getElementById('film-updated_at');
+        if (updatedAtInput && f.updated_at) {
+            updatedAtInput.value = formatUpdatedAtForInput(f.updated_at);
         }
 
         var featuredCheck = document.getElementById('film-featured');
@@ -737,10 +734,10 @@ async function submitFilm(action) {
             status: action === 'publish' ? 'published' : 'draft'
         };
 
-        // Ambil updated_at dari text input
-        var updatedAtText = document.getElementById('film-updated_at_text');
-        if (updatedAtText && updatedAtText.value) {
-            data.updated_at = updatedAtText.value;
+        // Ambil updated_at dari input datetime-local
+        const updatedAtInput = document.getElementById('film-updated_at');
+        if (updatedAtInput && updatedAtInput.value) {
+           data.updated_at = formatUpdatedAtForDB(updatedAtInput.value);
         }
 
         if (!data.title) { showToast('Judul wajib diisi!', 'error'); return; }
