@@ -53,15 +53,14 @@ function setUpdatedAtNowText() {
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
     
-    const formatted = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    const input = document.getElementById('film-updated_at_text');
+    const formatted = year + '-' + month + '-' + day + ' ' + hours + ':' + minutes + ':' + seconds;
+    var input = document.getElementById('film-updated_at_text');
     if (input) input.value = formatted;
     showToast('Waktu diatur ke sekarang', 'info');
 }
 
 function formatUpdatedAtForDB(datetimeStr) {
     if (!datetimeStr) return null;
-    // Format: "2026-06-08 13:07:00" -> "2026-06-08 13:07:00"
     return datetimeStr;
 }
 
@@ -71,18 +70,15 @@ function formatUpdatedAtForDB(datetimeStr) {
 
 async function loadDashboard() {
     var tableBody = document.getElementById('table-body');
-    if (!tableBody) {
-        console.error('table-body not found');
-        return;
-    }
-    tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">Memuat data...络络';
+    if (!tableBody) return;
+    tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">Memuat data...</td></tr>';
     try {
         if (typeof DASHBOARD_API === 'undefined') {
-            throw new Error('DASHBOARD_API tidak terdefinisi - cek api.js');
+            throw new Error('DASHBOARD_API tidak terdefinisi');
         }
         var res = await DASHBOARD_API.getAll();
         if (res.status !== 'success') {
-            tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">❌ ' + (res.message || 'Gagal') + '络络';
+            tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">❌ ' + (res.message || 'Gagal') + '</td></tr>';
             return;
         }
         allFilms = res.data || [];
@@ -94,7 +90,7 @@ async function loadDashboard() {
         if (allFilms.length > 0) showToast(allFilms.length + ' film dimuat', 'success');
     } catch (error) {
         console.error('loadDashboard error:', error);
-        tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">❌ ' + error.message + '络络';
+        tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">❌ ' + error.message + '</td></tr>';
     }
 }
 
@@ -156,7 +152,7 @@ function renderTable() {
     var tbody = document.getElementById('table-body');
     if (!tbody) return;
     if (filteredFilms.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="table-loading">Tidak ada film络络';
+        tbody.innerHTML = '<tr><td colspan="4" class="table-loading">Tidak ada film</td></tr>';
         return;
     }
     var start = (currentPage - 1) * perPage;
@@ -172,7 +168,9 @@ function renderTable() {
         var editUrl = 'editor.html?id=' + encodeURIComponent(film.id);
 
         html += '<tr>';
-        html += '<td style="width:28px;text-align:center;color:var(--admin-text3);font-size:0.75rem;">' + (start + i + 1) + '络';
+        html += '<td style="width:28px;text-align:center;color:var(--admin-text3);font-size:0.75rem;">' + (start + i + 1) + '</td>';
+        
+        // COVER
         html += '<td style="width:54px;">';
         html += '<a href="' + editUrl + '" class="cover-wrap" style="display:block;text-decoration:none;">';
         if (film.poster) {
@@ -186,8 +184,10 @@ function renderTable() {
         html += '</div>';
         html += '<span class="cover-type ' + (film.type || 'movie') + '">' + (film.type === 'series' ? 'S' : 'M') + '</span>';
         html += '</a>';
-        html += '络';
-        html += '<tr>';
+        html += '</td>';
+        
+        // JUDUL & INFO
+        html += '<td>';
         html += '<a href="' + editUrl + '" class="table-title-link" style="text-decoration:none; color:inherit; display:block;">';
         html += '<div class="table-title">' + (film.title || '—');
         if (isDraft) html += ' <span class="draft-badge">DRAFT</span>';
@@ -199,13 +199,16 @@ function renderTable() {
         html += '</div>';
         html += '<div style="font-size:0.68rem;color:var(--admin-text3);margin-top:2px;">' + (film.id || '') + '</div>';
         html += '</a>';
-        html += '络';
+        html += '</td>';
+        
+        // TOMBOL AKSI
         html += '<td style="width:76px;">';
         html += '<div class="table-actions">';
         html += '<a href="' + editUrl + '" class="admin-btn admin-btn-sm admin-btn-secondary" title="Edit"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></a>';
         html += '<button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteFilmById(\'' + film.id.replace(/'/g, "\\'") + '\')" title="Hapus"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>';
         html += '</div>';
-        html += '络';
+        html += '</td>';
+        
         html += '</tr>';
     }
     tbody.innerHTML = html;
@@ -657,7 +660,7 @@ async function loadFilmData(id) {
         setVal('film-backdrop', f.backdrop);
         setVal('film-trailer', f.trailer);
 
-        // DEBUG: Load updated_at ke text input dan debug span
+        // DEBUG: Load updated_at
         var debugSpan = document.getElementById('debug-updated_at');
         var textInput = document.getElementById('film-updated_at_text');
 
@@ -668,7 +671,6 @@ async function loadFilmData(id) {
 
         if (textInput && f.updated_at) {
             var displayValue = f.updated_at;
-            // Jika format ISO, ubah ke format lebih terbaca
             if (displayValue.includes('T')) {
                 displayValue = displayValue.replace('T', ' ').substring(0, 19);
             }
@@ -735,7 +737,7 @@ async function submitFilm(action) {
             status: action === 'publish' ? 'published' : 'draft'
         };
 
-        // Ambil updated_at dari text input jika ada
+        // Ambil updated_at dari text input
         var updatedAtText = document.getElementById('film-updated_at_text');
         if (updatedAtText && updatedAtText.value) {
             data.updated_at = updatedAtText.value;
