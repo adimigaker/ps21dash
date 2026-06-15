@@ -26,13 +26,14 @@ var DASHBOARD_API = {
         formatted.genre = film.genre;
         formatted.rating = parseFloat(film.rating) || null;
         formatted.duration = film.duration;
+        formatted.studio = film.studio || '';
         formatted.director = film.director;
         formatted.cast = film.cast;
         formatted.poster = film.poster;
         formatted.backdrop = film.backdrop;
         formatted.synopsis = film.synopsis;
         formatted.trailer = film.trailer;
-        
+
         // Tambahkan updated_at
         if (film.updated_at) {
             formatted.updated_at = film.updated_at;
@@ -67,13 +68,14 @@ var DASHBOARD_API = {
         formatted.genre = film.genre;
         formatted.rating = film.rating;
         formatted.duration = film.duration;
+        formatted.studio = film.studio || '';
         formatted.director = film.director;
         formatted.cast = film.cast;
         formatted.poster = film.poster;
         formatted.backdrop = film.backdrop;
         formatted.synopsis = film.synopsis;
         formatted.trailer = film.trailer;
-        
+
         // Tambahkan updated_at
         formatted.updated_at = film.updated_at || null;
 
