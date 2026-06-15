@@ -51,7 +51,7 @@ function setUpdatedAtNow() {
     const day = String(now.getDate()).padStart(2, '0');
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
-    
+
     const datetimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
     const input = document.getElementById('film-updated_at');
     if (input) input.value = datetimeLocal;
@@ -177,7 +177,7 @@ function renderTable() {
 
         html += '<tr>';
         html += '<td style="width:28px;text-align:center;color:var(--admin-text3);font-size:0.75rem;">' + (start + i + 1) + '</td>';
-        
+
         // COVER
         html += '<td style="width:54px;">';
         html += '<a href="' + editUrl + '" class="cover-wrap" style="display:block;text-decoration:none;">';
@@ -193,7 +193,7 @@ function renderTable() {
         html += '<span class="cover-type ' + (film.type || 'movie') + '">' + (film.type === 'series' ? 'S' : 'M') + '</span>';
         html += '</a>';
         html += '</td>';
-        
+
         // JUDUL & INFO
         html += '<td>';
         html += '<a href="' + editUrl + '" class="table-title-link" style="text-decoration:none; color:inherit; display:block;">';
@@ -208,7 +208,7 @@ function renderTable() {
         html += '<div style="font-size:0.68rem;color:var(--admin-text3);margin-top:2px;">' + (film.id || '') + '</div>';
         html += '</a>';
         html += '</td>';
-        
+
         // TOMBOL AKSI
         html += '<td style="width:76px;">';
         html += '<div class="table-actions">';
@@ -216,7 +216,7 @@ function renderTable() {
         html += '<button class="admin-btn admin-btn-sm admin-btn-danger" onclick="deleteFilmById(\'' + film.id.replace(/'/g, "\\'") + '\')" title="Hapus"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>';
         html += '</div>';
         html += '</td>';
-        
+
         html += '</tr>';
     }
     tbody.innerHTML = html;
@@ -662,6 +662,7 @@ async function loadFilmData(id) {
         setVal('film-duration', f.duration);
         setVal('film-genre', f.genre);
         setVal('film-synopsis', f.synopsis);
+        setVal('film-studio', f.studio || '');
         setVal('film-director', f.director);
         setVal('film-cast', f.cast);
         setVal('film-poster', f.poster);
@@ -724,6 +725,7 @@ async function submitFilm(action) {
             duration: document.getElementById('film-duration')?.value.trim() || '',
             genre: document.getElementById('film-genre')?.value.trim() || '',
             synopsis: document.getElementById('film-synopsis')?.value.trim() || '',
+            studio: document.getElementById('film-studio')?.value.trim() || '',
             director: document.getElementById('film-director')?.value.trim() || '',
             cast: document.getElementById('film-cast')?.value.trim() || '',
             poster: document.getElementById('film-poster')?.value.trim() || '',
@@ -857,6 +859,7 @@ function loadDraftData(data) {
     setVal('film-duration', data.duration || '');
     setVal('film-genre', data.genre || '');
     setVal('film-synopsis', data.synopsis || '');
+    setVal('film-studio', data.studio || '');
     setVal('film-director', data.director || '');
     setVal('film-cast', data.cast || '');
     setVal('film-poster', data.poster || '');
