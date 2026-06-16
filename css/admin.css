@@ -488,7 +488,6 @@ a { color: inherit; text-decoration: none; }
     .admin-toolbar { flex-direction: column; align-items: stretch; }
     .toolbar-left { flex-direction: column; }
     .admin-input, .admin-select { width: 100%; min-width: auto; }
-    .admin-stats { flex-direction: column; }
     .admin-table { font-size: 0.75rem; }
     .admin-table th, .admin-table td { padding: 6px 8px; }
 }
