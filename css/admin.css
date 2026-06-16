@@ -204,6 +204,55 @@ a { color: inherit; text-decoration: none; }
     letter-spacing: 1px;
 }
 
+/* ─── MOBILE: Statistik 1 baris (angka di samping label) ─── */
+@media (max-width: 768px) {
+    .admin-stats {
+        gap: 8px;
+        padding: 10px 12px;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .stat-item {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 4px 10px;
+        flex: 0 0 auto;
+        min-width: auto;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .stat-number {
+        display: inline;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--admin-accent);
+        font-family: 'Bebas Neue', sans-serif;
+        letter-spacing: 0.5px;
+    }
+
+    .stat-label {
+        font-size: 0.65rem;
+        color: var(--admin-text3);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline;
+    }
+
+    /* Pemisah antar stat */
+    .stat-item:not(:last-child)::after {
+        content: "•";
+        color: var(--admin-border);
+        margin-left: 8px;
+        font-size: 0.8rem;
+    }
+}
+
 /* ─── TABLE ─────────────────────────────────── */
 .admin-table-wrap {
     padding: 0 20px 20px;
