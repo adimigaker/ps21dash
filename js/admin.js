@@ -79,6 +79,20 @@ function formatUpdatedAtForInput(isoString) {
 async function loadDashboard() {
     var tableBody = document.getElementById('table-body');
     if (!tableBody) return;
+    
+    // === PAGE MEMORY: Baca parameter URL ===
+    var urlParams = new URLSearchParams(window.location.search);
+    var pageParam = urlParams.get('page');
+    var searchParam = urlParams.get('search');
+    var typeParam = urlParams.get('type');
+    var genreParam = urlParams.get('genre');
+
+    if (searchParam) document.getElementById('search-input').value = searchParam;
+    if (typeParam && typeParam !== 'all') document.getElementById('filter-type').value = typeParam;
+    if (genreParam && genreParam !== 'all') document.getElementById('filter-genre').value = genreParam;
+    if (pageParam) currentPage = parseInt(pageParam);
+    // === AKHIR PAGE MEMORY ===
+
     tableBody.innerHTML = '<tr><td colspan="4" class="table-loading">Memuat data...</td></tr>';
     try {
         if (typeof DASHBOARD_API === 'undefined') {
@@ -173,7 +187,17 @@ function renderTable() {
         var isDraft = film.status === 'draft';
         var isFeatured = film.featured === 'TRUE';
         var isPopular = film.popular === 'TRUE';
-        var editUrl = 'editor.html?id=' + encodeURIComponent(film.id);
+        
+        // === PAGE MEMORY: Simpan state di URL edit ===
+        var currentSearch = document.getElementById('search-input')?.value || '';
+        var currentType = document.getElementById('filter-type')?.value || 'all';
+        var currentGenre = document.getElementById('filter-genre')?.value || 'all';
+        var editUrl = 'editor.html?id=' + encodeURIComponent(film.id) 
+            + '&page=' + currentPage 
+            + '&search=' + encodeURIComponent(currentSearch)
+            + '&type=' + encodeURIComponent(currentType)
+            + '&genre=' + encodeURIComponent(currentGenre);
+        // === AKHIR PAGE MEMORY ===
 
         html += '<tr>';
         html += '<td style="width:28px;text-align:center;color:var(--admin-text3);font-size:0.75rem;">' + (start + i + 1) + '</td>';
@@ -234,7 +258,16 @@ function renderPagination() {
     container.innerHTML = html;
 }
 
-function goToPage(page) { currentPage = page; renderTable(); renderPagination(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function goToPage(page) { 
+    currentPage = page; 
+    renderTable(); 
+    renderPagination(); 
+    // Update URL parameter page agar tetap di halaman yang sama
+    var url = new URL(window.location);
+    url.searchParams.set('page', page);
+    window.history.pushState({}, '', url);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+}
 
 async function deleteFilmById(id) {
     if (!confirm('Yakin hapus "' + id + '"?')) return;
@@ -795,7 +828,20 @@ async function submitFilm(action) {
             localStorage.removeItem('ps21_draft');
             showDraftStatus('published');
             showToast('Berhasil dirilis!', 'success');
-            setTimeout(function() { window.location.href = 'index.html'; }, 1500);
+            
+            // === PAGE MEMORY: Kembali ke halaman yang sama ===
+            var returnPage = getParam('page') || '1';
+            var returnSearch = getParam('search') || '';
+            var returnType = getParam('type') || 'all';
+            var returnGenre = getParam('genre') || 'all';
+            
+            var redirectUrl = 'index.html?page=' + returnPage;
+            if (returnSearch) redirectUrl += '&search=' + encodeURIComponent(returnSearch);
+            if (returnType !== 'all') redirectUrl += '&type=' + encodeURIComponent(returnType);
+            if (returnGenre !== 'all') redirectUrl += '&genre=' + encodeURIComponent(returnGenre);
+            
+            setTimeout(function() { window.location.href = redirectUrl; }, 1500);
+            // === AKHIR PAGE MEMORY ===
         } else {
             showToast('' + (res.message || 'Gagal'), 'error');
         }
