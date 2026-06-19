@@ -11,6 +11,51 @@
 
     <link rel="stylesheet" href="css/admin.css">
     <style>
+
+/* ─── EPISODE FIELDS - RAPIKAN ─── */
+.episode-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+}
+
+.episode-fields > div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.episode-fields label {
+    font-size: 0.65rem;
+    color: var(--admin-text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.episode-fields input {
+    background: #0d0d14;
+    border: 1px solid #2a2a3a;
+    color: #fff;
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.78rem;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.episode-fields input:focus {
+    outline: none;
+    border-color: var(--admin-accent, #e50914);
+}
+
+/* Responsive: mobile 1 kolom */
+@media (max-width: 600px) {
+    .episode-fields {
+        grid-template-columns: 1fr;
+    }
+}
+
     .media-input-wrap { display:flex; gap:8px; align-items:center; }
     .media-input-wrap input { flex:1; margin-bottom:0 !important; }
     .media-upload-btn { flex-shrink:0; background:#2a2a3a; border:1px solid #3a3a4a; color:#aaa; border-radius:8px; padding:10px 12px; cursor:pointer; display:flex; align-items:center; transition:background 0.2s,color 0.2s; }
