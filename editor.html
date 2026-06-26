@@ -49,10 +49,27 @@
     border-color: var(--admin-accent, #e50914);
 }
 
+/* Video preview inside episode */
+.episode-video-preview {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+}
+
+.episode-video-preview iframe {
+    width: 100%;
+    height: 180px;
+    border: none;
+    border-radius: 8px;
+    background: #0a0a10;
+}
+
 /* Responsive: mobile 1 kolom */
 @media (max-width: 600px) {
     .episode-fields {
         grid-template-columns: 1fr;
+    }
+    .episode-video-preview {
+        grid-column: 1;
     }
 }
 
@@ -139,6 +156,30 @@
         outline: none;
         border-color: var(--admin-accent, #e50914);
     }
+
+    /* Video preview container for movie */
+    .video-preview-container {
+        margin-top: 6px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #0a0a10;
+    }
+    .video-preview-container iframe {
+        width: 100%;
+        height: 200px;
+        border: none;
+        display: block;
+    }
+    .video-preview-placeholder {
+        display: block;
+        padding: 20px;
+        text-align: center;
+        color: #666;
+        font-size: 0.8rem;
+        background: #0d0d14;
+        border: 1px dashed #2a2a3a;
+        border-radius: 8px;
+    }
     </style>
 </head>
 <body>
@@ -212,35 +253,34 @@
                 </div>
             </div>
 
-			<!-- DETAIL -->
-			<div class="form-section">
-			    <h3 class="form-section-title">
-			        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
-   			     Detail Konten
-  			  </h3>
+            <!-- DETAIL -->
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                    Detail Konten
+                </h3>
 
-			    <div class="form-group">
-  			      <label for="film-synopsis">Sinopsis</label>
- 			       <textarea id="film-synopsis" rows="4" placeholder="Sinopsis film..."></textarea>
-			    </div>
+                <div class="form-group">
+                    <label for="film-synopsis">Sinopsis</label>
+                    <textarea id="film-synopsis" rows="4" placeholder="Sinopsis film..."></textarea>
+                </div>
 
- 			   <!-- STUDIO - Tambahan baru -->
- 			   <div class="form-group">
-   			     <label for="film-studio">Studio</label>
-     			   <input type="text" id="film-studio" placeholder="Nama Studio">
-    			    <small>Nama studio produksi anime/film</small>
-			    </div>
+                <div class="form-group">
+                    <label for="film-studio">Studio</label>
+                    <input type="text" id="film-studio" placeholder="Nama Studio">
+                    <small>Nama studio produksi anime/film</small>
+                </div>
 
- 			   <div class="form-group">
-     			   <label for="film-director">Sutradara</label>
-   			     <input type="text" id="film-director" placeholder="Nama sutradara">
- 			   </div>
+                <div class="form-group">
+                    <label for="film-director">Sutradara</label>
+                    <input type="text" id="film-director" placeholder="Nama sutradara">
+                </div>
 
- 			   <div class="form-group">
-    			    <label for="film-cast">Pemeran</label>
-   			     <input type="text" id="film-cast" placeholder="Actor 1, Actor 2">
- 			   </div>
-			</div>
+                <div class="form-group">
+                    <label for="film-cast">Pemeran</label>
+                    <input type="text" id="film-cast" placeholder="Actor 1, Actor 2">
+                </div>
+            </div>
 
             <!-- MEDIA -->
             <div class="form-section">
@@ -301,6 +341,14 @@
                         <label for="film-subtitle">URL Subtitle</label>
                         <input type="text" id="film-subtitle" placeholder="https://example.com/sub.vtt">
                     </div>
+                    
+                    <!-- Video Preview for Movie -->
+                    <div class="form-group">
+                        <label>Preview Video</label>
+                        <div id="video-preview-movie" class="video-preview-container">
+                            <span class="video-preview-placeholder">Preview video akan muncul di sini (Embed atau Mirror)</span>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- SERIES -->
@@ -348,24 +396,23 @@
                 <small style="color:#8888aa;">* Featured bisa lebih dari satu — hero akan tampil secara acak.</small>
             </div>
 
-            <!-- UPDATE TERAKHIR (DEBUG - Text biasa) -->
             <!-- UPDATE TERAKHIR -->
-<div class="form-section">
-    <h3 class="form-section-title">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        Update Terakhir
-    </h3>
-    <div class="form-group">
-        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-            <input type="datetime-local" id="film-updated_at" style="flex: 1; background: #0d0d14; border: 1px solid #2a2a3a; color: #fff; border-radius: 7px; padding: 8px 10px;">
-            <button type="button" class="admin-btn admin-btn-sm" onclick="setUpdatedAtNow()" style="white-space: nowrap; background: #2a2a3a; border: 1px solid #3a3a4a; color: #fff;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                NOW
-            </button>
-        </div>
-        <small style="color:#8888aa;">Kosongkan untuk otomatis (hanya berubah jika embed_url diupdate), atau atur manual.</small>
-    </div>
-</div>
+            <div class="form-section">
+                <h3 class="form-section-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    Update Terakhir
+                </h3>
+                <div class="form-group">
+                    <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        <input type="datetime-local" id="film-updated_at" style="flex: 1; background: #0d0d14; border: 1px solid #2a2a3a; color: #fff; border-radius: 7px; padding: 8px 10px;">
+                        <button type="button" class="admin-btn admin-btn-sm" onclick="setUpdatedAtNow()" style="white-space: nowrap; background: #2a2a3a; border: 1px solid #3a3a4a; color: #fff;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            NOW
+                        </button>
+                    </div>
+                    <small style="color:#8888aa;">Kosongkan untuk otomatis (hanya berubah jika embed_url diupdate), atau atur manual.</small>
+                </div>
+            </div>
 
             <!-- TOMBOL AKSI -->
             <div class="form-actions">
@@ -399,7 +446,16 @@
             initEditor();
             var typeEl = document.getElementById('film-type');
             if (typeEl) {
-                typeEl.addEventListener('change', toggleSeriesPanel);
+                typeEl.addEventListener('change', function() {
+                    toggleSeriesPanel();
+                    // Setup video preview after panel toggle
+                    setTimeout(function() {
+                        if (this.value === 'movie') {
+                            setupVideoPreview('film-embed', 'video-preview-movie', 'movie');
+                            setupVideoPreview('film-mirror', 'video-preview-movie', 'movie');
+                        }
+                    }.bind(this), 100);
+                });
                 toggleSeriesPanel();
             }
         });
@@ -409,6 +465,14 @@
             var isSeries = type === 'series';
             document.getElementById('panel-movie').style.display = isSeries ? 'none' : 'block';
             document.getElementById('panel-series').style.display = isSeries ? 'block' : 'none';
+            
+            // Setup video preview for movie if not series
+            if (!isSeries) {
+                setTimeout(function() {
+                    setupVideoPreview('film-embed', 'video-preview-movie', 'movie');
+                    setupVideoPreview('film-mirror', 'video-preview-movie', 'movie');
+                }, 100);
+            }
         }
     </script>
 </body>
