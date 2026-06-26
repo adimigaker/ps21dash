@@ -288,7 +288,7 @@ function setupFilters() {
 }
 
 // =============================================
-// PREVIEW FUNCTIONS
+// PREVIEW FUNCTIONS (IMAGE)
 // =============================================
 
 function setupPreview(inputId, previewId) {
@@ -308,36 +308,38 @@ function showPreview(preview, url) {
 }
 
 // =============================================
-// VIDEO PREVIEW FUNCTIONS
+// VIDEO PREVIEW FUNCTIONS (NEW)
 // =============================================
 
-function setupVideoPreview(inputId, previewId, type) {
+function setupVideoPreview(inputId, previewId) {
     var input = document.getElementById(inputId);
     var preview = document.getElementById(previewId);
     if (!input || !preview) return;
     
     // Initial preview if value exists
     if (input.value.trim()) {
-        showVideoPreview(preview, input.value.trim(), type);
+        showVideoPreview(preview, input.value.trim());
     }
     
     input.addEventListener('input', function() {
-        showVideoPreview(preview, this.value.trim(), type);
+        showVideoPreview(preview, this.value.trim());
     });
 }
 
-function showVideoPreview(preview, url, type) {
+function showVideoPreview(preview, url) {
     if (!url) {
-        preview.innerHTML = '<span class="preview-placeholder">Tidak ada URL video</span>';
+        preview.innerHTML = '<span class="video-preview-placeholder">Preview video akan muncul di sini</span>';
         return;
     }
     
     // Check if URL is from supported platforms
     var isDoodstream = url.includes('doodstream.com') || url.includes('dood.to');
     var isMixdrop = url.includes('mixdrop.co') || url.includes('mixdrop.to');
-    var isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+    var isYouTube = url.includes('youtube.com') || url.includes('youtu.be') || url.includes('youtube.com/embed');
     var isVidmoly = url.includes('vidmoly.com') || url.includes('vidmoly.to');
     var isVidguard = url.includes('vidguard.com') || url.includes('vidguard.to');
+    var isEmbedMaster = url.includes('embedmaster.link');
+    var isVidFast = url.includes('vidfast.pro');
     
     var embedUrl = '';
     
@@ -350,7 +352,6 @@ function showVideoPreview(preview, url, type) {
         } else {
             embedUrl = url;
         }
-        preview.innerHTML = '<div class="video-preview-container"><iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe></div>';
     } else if (isMixdrop) {
         // Mixdrop embed format
         if (url.includes('/e/')) {
@@ -361,7 +362,6 @@ function showVideoPreview(preview, url, type) {
         } else {
             embedUrl = url;
         }
-        preview.innerHTML = '<div class="video-preview-container"><iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe></div>';
     } else if (isYouTube) {
         // YouTube embed
         var videoId = '';
@@ -374,9 +374,9 @@ function showVideoPreview(preview, url, type) {
         }
         if (videoId) {
             embedUrl = 'https://www.youtube.com/embed/' + videoId;
-            preview.innerHTML = '<div class="video-preview-container"><iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe></div>';
         } else {
-            preview.innerHTML = '<span class="preview-placeholder">URL YouTube tidak valid</span>';
+            preview.innerHTML = '<span class="video-preview-placeholder">URL YouTube tidak valid</span>';
+            return;
         }
     } else if (isVidmoly) {
         // Vidmoly embed format
@@ -385,7 +385,6 @@ function showVideoPreview(preview, url, type) {
         } else {
             embedUrl = url;
         }
-        preview.innerHTML = '<div class="video-preview-container"><iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe></div>';
     } else if (isVidguard) {
         // Vidguard embed format
         if (url.includes('/e/') || url.includes('/v/')) {
@@ -393,37 +392,27 @@ function showVideoPreview(preview, url, type) {
         } else {
             embedUrl = url;
         }
-        preview.innerHTML = '<div class="video-preview-container"><iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe></div>';
+    } else if (isEmbedMaster) {
+        // EmbedMaster - langsung gunakan URL asli
+        embedUrl = url;
+    } else if (isVidFast) {
+        // VidFast - langsung gunakan URL asli
+        embedUrl = url;
     } else {
         // Try direct embed for other platforms
-        preview.innerHTML = '<span class="preview-placeholder">Platform tidak didukung untuk preview</span>';
+        embedUrl = url;
+    }
+    
+    if (embedUrl) {
+        preview.innerHTML = '<iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
+    } else {
+        preview.innerHTML = '<span class="video-preview-placeholder">Platform tidak didukung untuk preview</span>';
     }
 }
 
-function setupEpisodeVideoPreviews(containerId) {
-    var container = document.getElementById(containerId);
-    if (!container) return;
-    
-    // Use MutationObserver to detect new episode items
-    var observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.addedNodes) {
-                mutation.addedNodes.forEach(function(node) {
-                    if (node.nodeType === 1 && node.classList && node.classList.contains('episode-item')) {
-                        setupEpisodeVideoPreview(node);
-                    }
-                });
-            }
-        });
-    });
-    
-    observer.observe(container, { childList: true, subtree: false });
-    
-    // Setup existing episodes
-    container.querySelectorAll('.episode-item').forEach(function(item) {
-        setupEpisodeVideoPreview(item);
-    });
-}
+// =============================================
+// EPISODE VIDEO PREVIEW FUNCTIONS
+// =============================================
 
 function setupEpisodeVideoPreview(episodeItem) {
     var embedInput = episodeItem.querySelector('.ep-embed');
@@ -438,7 +427,7 @@ function setupEpisodeVideoPreview(episodeItem) {
             previewContainer.className = 'episode-video-preview';
             previewContainer.style.marginTop = '8px';
             previewContainer.style.gridColumn = '1 / -1';
-            previewContainer.innerHTML = '<span class="preview-placeholder" style="font-size:0.7rem;color:#666;">Preview video akan muncul di sini</span>';
+            previewContainer.innerHTML = '<span class="video-preview-placeholder" style="font-size:0.7rem;">Preview video akan muncul di sini</span>';
             fieldsDiv.appendChild(previewContainer);
         }
     }
@@ -449,9 +438,19 @@ function setupEpisodeVideoPreview(episodeItem) {
         var url = embedUrl || mirrorUrl;
         
         if (url && previewContainer) {
-            showVideoPreview(previewContainer, url, 'episode');
+            // Use the same showVideoPreview function but with a wrapper div
+            previewContainer.innerHTML = '';
+            var iframe = document.createElement('iframe');
+            iframe.src = url;
+            iframe.style.width = '100%';
+            iframe.style.height = '180px';
+            iframe.style.border = 'none';
+            iframe.style.borderRadius = '8px';
+            iframe.allowFullscreen = true;
+            iframe.loading = 'lazy';
+            previewContainer.appendChild(iframe);
         } else if (previewContainer) {
-            previewContainer.innerHTML = '<span class="preview-placeholder" style="font-size:0.7rem;color:#666;">Preview video akan muncul di sini</span>';
+            previewContainer.innerHTML = '<span class="video-preview-placeholder" style="font-size:0.7rem;">Preview video akan muncul di sini</span>';
         }
     }
     
@@ -460,6 +459,34 @@ function setupEpisodeVideoPreview(episodeItem) {
     
     // Initial preview
     updatePreview();
+}
+
+function setupEpisodeVideoPreviews(containerId) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // Setup existing episodes
+    container.querySelectorAll('.episode-item').forEach(function(item) {
+        setupEpisodeVideoPreview(item);
+    });
+    
+    // Use MutationObserver to detect new episode items
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.addedNodes) {
+                mutation.addedNodes.forEach(function(node) {
+                    if (node.nodeType === 1 && node.classList && node.classList.contains('episode-item')) {
+                        // Small delay to ensure DOM is ready
+                        setTimeout(function() {
+                            setupEpisodeVideoPreview(node);
+                        }, 50);
+                    }
+                });
+            }
+        });
+    });
+    
+    observer.observe(container, { childList: true, subtree: false });
 }
 
 // =============================================
@@ -503,7 +530,7 @@ function createEpisodeElement(data) {
     // Setup video preview for this episode after DOM creation
     setTimeout(function() {
         setupEpisodeVideoPreview(div);
-    }, 0);
+    }, 50);
     
     return div;
 }
@@ -894,8 +921,8 @@ async function loadFilmData(id) {
             setVal('film-subtitle', f.subtitle_url || '');
             
             // Setup video preview for movie
-            setupVideoPreview('film-embed', 'video-preview-movie', 'movie');
-            setupVideoPreview('film-mirror', 'video-preview-movie', 'movie');
+            setupVideoPreview('film-embed', 'video-preview-movie');
+            setupVideoPreview('film-mirror', 'video-preview-movie');
         }
 
         showToast('Data dimuat', 'success');
@@ -1102,8 +1129,8 @@ function loadDraftData(data) {
         setVal('film-subtitle', data.subtitle_url || '');
         
         // Setup video preview for movie
-        setupVideoPreview('film-embed', 'video-preview-movie', 'movie');
-        setupVideoPreview('film-mirror', 'video-preview-movie', 'movie');
+        setupVideoPreview('film-embed', 'video-preview-movie');
+        setupVideoPreview('film-mirror', 'video-preview-movie');
     }
 
     var featuredCheck = document.getElementById('film-featured');
