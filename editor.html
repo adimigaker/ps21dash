@@ -49,13 +49,14 @@
     border-color: var(--admin-accent, #e50914);
 }
 
-/* Video preview inside episode */
-.episode-video-preview {
-    grid-column: 1 / -1;
-    margin-top: 8px;
+/* Episode preview - muncul di bawah masing-masing field */
+.ep-embed-preview,
+.ep-mirror-preview {
+    margin-top: 4px;
 }
 
-.episode-video-preview iframe {
+.ep-embed-preview iframe,
+.ep-mirror-preview iframe {
     width: 100%;
     height: 180px;
     border: none;
@@ -67,9 +68,6 @@
 @media (max-width: 600px) {
     .episode-fields {
         grid-template-columns: 1fr;
-    }
-    .episode-video-preview {
-        grid-column: 1;
     }
 }
 
@@ -157,33 +155,18 @@
         border-color: var(--admin-accent, #e50914);
     }
 
-    /* Video preview container - SAMA SEPERTI PREVIEW GAMBAR */
+    /* Video preview container - muncul hanya jika ada URL */
     .video-preview-container {
-        margin-top: 6px;
+        margin-top: 4px;
         border-radius: 8px;
         overflow: hidden;
         background: #0a0a10;
-        min-height: 40px;
-        border: 1px dashed #2a2a3a;
-        padding: 4px;
-        transition: border-color 0.3s;
-    }
-    .video-preview-container:has(iframe) {
-        border-color: #3a3a4a;
-        padding: 0;
     }
     .video-preview-container iframe {
         width: 100%;
         height: 200px;
         border: none;
         display: block;
-    }
-    .video-preview-placeholder {
-        display: block;
-        padding: 12px 16px;
-        text-align: center;
-        color: #666;
-        font-size: 0.8rem;
     }
     </style>
 </head>
@@ -333,9 +316,7 @@
                     <div class="form-group">
                         <label for="film-embed">URL Embed</label>
                         <input type="text" id="film-embed" placeholder="https://doodstream.com/e/xxxxx">
-                        <div class="video-preview-container" id="video-preview-movie">
-                            <span class="video-preview-placeholder">Preview video akan muncul di sini</span>
-                        </div>
+                        <div class="video-preview-container" id="video-preview-movie"></div>
                     </div>
                     <div class="form-group">
                         <label for="film-download">URL Download</label>
@@ -344,9 +325,7 @@
                     <div class="form-group">
                         <label for="film-mirror">URL Mirror</label>
                         <input type="text" id="film-mirror" placeholder="https://mixdrop.co/e/xxxxx">
-                        <div class="video-preview-container" id="video-preview-movie-mirror">
-                            <span class="video-preview-placeholder">Preview video akan muncul di sini</span>
-                        </div>
+                        <div class="video-preview-container" id="video-preview-movie-mirror"></div>
                     </div>
                     <div class="form-group">
                         <label for="film-subtitle">URL Subtitle</label>
@@ -451,7 +430,6 @@
             if (typeEl) {
                 typeEl.addEventListener('change', function() {
                     toggleSeriesPanel();
-                    // Setup video preview for movie after panel toggle
                     setTimeout(function() {
                         if (this.value === 'movie') {
                             setupVideoPreview('film-embed', 'video-preview-movie');
@@ -469,7 +447,6 @@
             document.getElementById('panel-movie').style.display = isSeries ? 'none' : 'block';
             document.getElementById('panel-series').style.display = isSeries ? 'block' : 'none';
             
-            // Setup video preview for movie if not series
             if (!isSeries) {
                 setTimeout(function() {
                     setupVideoPreview('film-embed', 'video-preview-movie');
