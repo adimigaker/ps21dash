@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="css/admin.css">
     <style>
 
-/* ─── EPISODE FIELDS - RAPIKAN ─── */
+/* ─── EPISODE FIELDS ─── */
 .episode-fields {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -157,12 +157,20 @@
         border-color: var(--admin-accent, #e50914);
     }
 
-    /* Video preview container for movie */
+    /* Video preview container - SAMA SEPERTI PREVIEW GAMBAR */
     .video-preview-container {
         margin-top: 6px;
         border-radius: 8px;
         overflow: hidden;
         background: #0a0a10;
+        min-height: 40px;
+        border: 1px dashed #2a2a3a;
+        padding: 4px;
+        transition: border-color 0.3s;
+    }
+    .video-preview-container:has(iframe) {
+        border-color: #3a3a4a;
+        padding: 0;
     }
     .video-preview-container iframe {
         width: 100%;
@@ -172,13 +180,10 @@
     }
     .video-preview-placeholder {
         display: block;
-        padding: 20px;
+        padding: 12px 16px;
         text-align: center;
         color: #666;
         font-size: 0.8rem;
-        background: #0d0d14;
-        border: 1px dashed #2a2a3a;
-        border-radius: 8px;
     }
     </style>
 </head>
@@ -328,6 +333,9 @@
                     <div class="form-group">
                         <label for="film-embed">URL Embed</label>
                         <input type="text" id="film-embed" placeholder="https://doodstream.com/e/xxxxx">
+                        <div class="video-preview-container" id="video-preview-movie">
+                            <span class="video-preview-placeholder">Preview video akan muncul di sini</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="film-download">URL Download</label>
@@ -336,18 +344,13 @@
                     <div class="form-group">
                         <label for="film-mirror">URL Mirror</label>
                         <input type="text" id="film-mirror" placeholder="https://mixdrop.co/e/xxxxx">
+                        <div class="video-preview-container" id="video-preview-movie-mirror">
+                            <span class="video-preview-placeholder">Preview video akan muncul di sini</span>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label for="film-subtitle">URL Subtitle</label>
                         <input type="text" id="film-subtitle" placeholder="https://example.com/sub.vtt">
-                    </div>
-                    
-                    <!-- Video Preview for Movie -->
-                    <div class="form-group">
-                        <label>Preview Video</label>
-                        <div id="video-preview-movie" class="video-preview-container">
-                            <span class="video-preview-placeholder">Preview video akan muncul di sini (Embed atau Mirror)</span>
-                        </div>
                     </div>
                 </div>
 
@@ -448,11 +451,11 @@
             if (typeEl) {
                 typeEl.addEventListener('change', function() {
                     toggleSeriesPanel();
-                    // Setup video preview after panel toggle
+                    // Setup video preview for movie after panel toggle
                     setTimeout(function() {
                         if (this.value === 'movie') {
-                            setupVideoPreview('film-embed', 'video-preview-movie', 'movie');
-                            setupVideoPreview('film-mirror', 'video-preview-movie', 'movie');
+                            setupVideoPreview('film-embed', 'video-preview-movie');
+                            setupVideoPreview('film-mirror', 'video-preview-movie-mirror');
                         }
                     }.bind(this), 100);
                 });
@@ -469,8 +472,8 @@
             // Setup video preview for movie if not series
             if (!isSeries) {
                 setTimeout(function() {
-                    setupVideoPreview('film-embed', 'video-preview-movie', 'movie');
-                    setupVideoPreview('film-mirror', 'video-preview-movie', 'movie');
+                    setupVideoPreview('film-embed', 'video-preview-movie');
+                    setupVideoPreview('film-mirror', 'video-preview-movie-mirror');
                 }, 100);
             }
         }
