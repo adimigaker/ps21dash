@@ -1145,7 +1145,17 @@ async function ambilMeta() {
                 b.type = 'button';
                 b.innerHTML = (h.poster ? '<img src="' + escapeAttr(h.poster) + '" alt="">' : '<span style="width:32px;flex-shrink:0"></span>') +
                     '<span class="meta-judul">' + escapeAttr(h.title || '') + (h.year ? ' (' + h.year + ')' : '') + '</span>';
-                b.addEventListener('click', function() { terapkanMeta(h, info, box); });
+                b.addEventListener('click', function() {
+                    // Search result = data ringkas → fetch detail lengkap dulu
+                    info.className = 'load';
+                    info.textContent = '⟳ Mengambil detail...';
+                    fetch(BASE + '?tmdb=' + h.tmdb_id + '&media=' + (h.media || media))
+                        .then(function(r2) { return r2.json(); })
+                        .then(function(det) {
+                            terapkanMeta(det && !det.error ? det : h, info, box);
+                        })
+                        .catch(function() { terapkanMeta(h, info, box); });
+                });
                 box.appendChild(b);
             });
             return;
