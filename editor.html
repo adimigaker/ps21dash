@@ -12,6 +12,98 @@
     <link rel="stylesheet" href="css/admin.css">
     <style>
 
+/* ─── AMBIL METADATA (URL + TOMBOL AMBIL) ─── */
+.meta-baris {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.meta-baris input {
+    flex: 1;
+    min-width: 0;
+}
+
+.meta-baris .admin-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+#meta-info {
+    font-size: 0.75rem;
+    margin-top: 6px;
+    color: var(--admin-text3);
+}
+
+#meta-info.ok { color: #2ea043; }
+#meta-info.err { color: var(--admin-accent); }
+#meta-info.load { color: var(--admin-accent); }
+
+#meta-hasil {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+#meta-hasil button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--admin-card);
+    border: 1px solid var(--admin-border);
+    border-radius: var(--admin-radius);
+    color: var(--admin-text);
+    padding: 6px;
+    cursor: pointer;
+    max-width: 240px;
+    text-align: left;
+    font-size: 0.75rem;
+}
+
+#meta-hasil button:hover {
+    border-color: var(--admin-accent);
+}
+
+#meta-hasil button img {
+    width: 32px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+#meta-hasil button .meta-judul {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+/* ─── 1 BARIS 3 KOLOM (Tahun/Rating/Durasi) — tetap baris di mobile ─── */
+.form-row.form-row-3col {
+    flex-direction: row !important;
+}
+
+.form-row.form-row-3col .form-group {
+    min-width: 0;
+}
+
+@media (max-width: 500px) {
+    .form-row.form-row-3col {
+        flex-direction: row !important;
+        gap: 6px;
+    }
+    .form-row.form-row-3col .form-group label {
+        font-size: 0.7rem;
+    }
+    .form-row.form-row-3col .form-group input {
+        padding: 8px 6px;
+        font-size: 0.8rem;
+    }
+}
+
 /* ─── EPISODE FIELDS ─── */
 .episode-fields {
     display: grid;
@@ -195,6 +287,21 @@
                     Informasi Dasar
                 </h3>
 
+                <!-- AMBIL METADATA OTOMATIS DARI URL -->
+                <div class="form-group">
+                    <label for="meta-url">Tempel URL IMDb / TMDB / judul (opsional — skip kalau manual)</label>
+                    <div class="meta-baris">
+                        <input type="text" id="meta-url" placeholder="https://www.imdb.com/title/tt... atau judul">
+                        <button type="button" id="btn-ambil" class="admin-btn" onclick="ambilMeta()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Ambil
+                        </button>
+                    </div>
+                    <small>Tempel URL IMDb, TMDB, atau ketik judulnya — klik Ambil, metadata terisi otomatis.</small>
+                    <div id="meta-info"></div>
+                    <div id="meta-hasil"></div>
+                </div>
+
                 <div class="form-row">
                     <div class="form-group flex-2">
                         <label for="film-id">ID Film *</label>
@@ -220,7 +327,7 @@
                     <input type="text" id="film-slug" placeholder="judul-film-tahun (auto)">
                 </div>
 
-                <div class="form-row">
+                <div class="form-row form-row-3col">
                     <div class="form-group">
                         <label for="film-year">Tahun *</label>
                         <input type="number" id="film-year" required placeholder="2024" min="1900" max="2099">
