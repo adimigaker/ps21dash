@@ -1097,7 +1097,9 @@ async function ambilMeta() {
     var raw = urlInput.value.trim();
     var imdb = '';
     var tmdb = '';
-    var media = 'movie';
+    // Media default ikut dropdown Tipe (movie / series) agar pencarian judulseries jalan
+    var tipeEl = document.getElementById('film-type');
+    var media = (tipeEl && tipeEl.value === 'series') ? 'tv' : 'movie';
     // Deteksi format URL
     if (/tt\d+/.test(raw)) {
         imdb = raw.match(/tt\d+/)[0];
