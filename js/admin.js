@@ -1089,6 +1089,7 @@ async function submitFilm(action) {
 async function ambilMeta() {
     var urlInput = document.getElementById('meta-url');
     var btn = document.getElementById('btn-ambil');
+    var info = document.getElementById('meta-info');
     if (!urlInput || !urlInput.value.trim()) {
         showToast('Isi URL IMDb/TMDB dulu', 'info');
         return;
@@ -1096,77 +1097,112 @@ async function ambilMeta() {
     var raw = urlInput.value.trim();
     var imdb = '';
     var tmdb = '';
+    var media = 'movie';
     // Deteksi format URL
-    if (raw.includes('/title/tt') || raw.startsWith('tt')) {
-        imdb = raw.includes('/title/') ? raw.match(/tt\d+/) : null;
-        if (imdb && imdb[0]) imdb = imdb[0];
-    } else if (raw.includes('themoviedb.org/movie/') || raw.includes('themoviedb.org/tv/')) {
-        var m = raw.match(/\/movie\/(\d+)/) || raw.match(/\/tv\/(\d+)/);
-        if (m) tmdb = m[1];
+    if (/tt\d+/.test(raw)) {
+        imdb = raw.match(/tt\d+/)[0];
+    } else if (raw.includes('themoviedb.org/')) {
+        var m = raw.match(/themoviedb\.org\/(movie|tv)\/(\d+)/);
+        if (m) { tmdb = m[2]; media = m[1]; }
     } else if (/^\d+$/.test(raw)) {
         tmdb = raw;
     }
 
-    var info = document.getElementById('meta-info');
     info.className = 'load';
     info.textContent = '⟳ Mengambil metadata...';
+    document.getElementById('meta-hasil').innerHTML = '';
 
-    if (btn) { btn.disabled = true; btn.textContent = '⟳'; }
+    if (btn) { btn.disabled = true; btn.innerHTML = '⟳'; }
 
     try {
+        // Proxy TMDB ada di originplayer (CORS sudah diizinkan)
+        var BASE = 'https://originplayer.vercel.app/api/tmdb';
         var params = '';
         if (imdb) params = '?imdb=' + imdb;
-        else if (tmdb) params = '?tmdb=' + tmdb + '&media=movie';
-        else params = '?search=' + encodeURIComponent(raw);
+        else if (tmdb) params = '?tmdb=' + tmdb + '&media=' + media;
+        else params = '?search=' + encodeURIComponent(raw) + '&media=' + media;
 
-        var res = await fetch('/api/tmdb' + params);
+        var res = await fetch(BASE + params);
         var data = await res.json();
-        if (data.error) {
+        if (data && data.error) {
             info.className = 'err';
             info.textContent = '' + data.error;
             return;
         }
 
-        // Terapkan ke form
-        setVal('film-title', data.title || '');
-        setVal('film-year', data.year || '');
-        setVal('film-rating', data.rating || '');
-        setVal('film-genre', data.genre || '');
-        setVal('film-synopsis', data.synopsis || '');
-        setVal('film-director', data.director || '');
-        setVal('film-cast', data.cast || '');
-
-        // Poster & backdrop (URL asli)
-        if (data.poster) {
-            setVal('film-poster', 'https://image.tmdb.org/t/p/w500' + data.poster);
-            showPreview(document.getElementById('poster-preview'), 'https://image.tmdb.org/t/p/w500' + data.poster);
-        }
-        if (data.backdrop) {
-            setVal('film-backdrop', 'https://image.tmdb.org/t/p/original' + data.backdrop);
-            showPreview(document.getElementById('backdrop-preview'), 'https://image.tmdb.org/t/p/original' + data.backdrop);
-        }
-
-        // Auto-generate slug (jika belum manual)
-        var slugEl = document.getElementById('film-slug');
-        if (slugEl && !slugEl.dataset.manual) {
-            var s = (data.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-            if (data.year) s += '-' + data.year;
-            slugEl.value = s;
+        // Hasil pencarian judul (array) → tampilkan daftar pilihan
+        if (Array.isArray(data)) {
+            if (!data.length) {
+                info.className = 'err';
+                info.textContent = 'Tidak ketemu. Coba kata kunci lain.';
+                return;
+            }
+            info.className = '';
+            info.textContent = 'Pilih hasil yang benar:';
+            var box = document.getElementById('meta-hasil');
+            data.forEach(function(h) {
+                var b = document.createElement('button');
+                b.type = 'button';
+                b.innerHTML = (h.poster ? '<img src="' + escapeAttr(h.poster) + '" alt="">' : '<span style="width:32px;flex-shrink:0"></span>') +
+                    '<span class="meta-judul">' + escapeAttr(h.title || '') + (h.year ? ' (' + h.year + ')' : '') + '</span>';
+                b.addEventListener('click', function() { terapkanMeta(h, info, box); });
+                box.appendChild(b);
+            });
+            return;
         }
 
-        // Simpan draft
-        try { localStorage.setItem('ps21_draft', JSON.stringify(data)); } catch(e) {}
-
-        info.className = 'ok';
-        info.textContent = '✅ Metadata terisi — cek lalu simpan.';
-        showToast('Metadata terisi! Cek lalu simpan.', 'success');
+        terapkanMeta(data, info, document.getElementById('meta-hasil'));
     } catch (e) {
         info.className = 'err';
         info.textContent = 'Gagal: ' + e.message;
         showToast('Gagal ambil metadata: ' + e.message, 'error');
     } finally {
-        if (btn) { btn.disabled = false; btn.textContent = 'Ambil'; }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Ambil'; }
     }
+}
+
+function terapkanMeta(data, info, hasilBox) {
+    if (hasilBox) hasilBox.innerHTML = '';
+    if (data.media === 'tv') {
+        var tipeEl = document.getElementById('film-type');
+        if (tipeEl && tipeEl.value !== 'series') {
+            tipeEl.value = 'series';
+            if (typeof toggleSeriesPanel === 'function') toggleSeriesPanel();
+        }
+    }
+
+    setVal('film-title', data.title || '');
+    setVal('film-year', data.year || '');
+    setVal('film-rating', data.rating || '');
+    setVal('film-duration', data.duration || '');
+    setVal('film-genre', data.genre || '');
+    setVal('film-synopsis', data.synopsis || '');
+    setVal('film-director', data.director || '');
+    setVal('film-cast', data.cast || '');
+
+    // poster/backdrop dari proxy sudah berupa URL lengkap
+    if (data.poster) {
+        setVal('film-poster', data.poster);
+        showPreview(document.getElementById('poster-preview'), data.poster);
+    }
+    if (data.backdrop) {
+        setVal('film-backdrop', data.backdrop);
+        showPreview(document.getElementById('backdrop-preview'), data.backdrop);
+    }
+
+    // Auto-generate slug (jika belum manual)
+    var slugEl = document.getElementById('film-slug');
+    if (slugEl && !slugEl.dataset.manual) {
+        var s = (data.title || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        if (data.year) s += '-' + data.year;
+        slugEl.value = s;
+    }
+
+    if (info) {
+        info.className = 'ok';
+        info.textContent = '✅ Metadata terisi — tinggal isi URL embed, lalu cek field lain.';
+    }
+    showToast('Metadata terisi! Tinggal isi URL embed.', 'success');
 }
 
 async function deleteFilm() {
