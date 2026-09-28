@@ -408,7 +408,7 @@ function showVideoPreview(preview, url) {
     if (embedUrl) {
         preview.style.display = 'block';
         if (embedUrl.includes('/api/media/') || embedUrl.endsWith('.mp4')) {
-            preview.innerHTML = '<video src="' + embedUrl + '" controls style="width:100%;height:200px;border-radius:8px;background:#000;object-fit:contain;"></video>';
+            preview.innerHTML = '<video src="' + embedUrl + '" controls crossorigin="anonymous" style="width:100%;height:200px;border-radius:8px;background:#000;object-fit:contain;"></video>';
         } else {
             preview.innerHTML = '<iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
         }
@@ -457,7 +457,7 @@ function setupEpisodeVideoPreview(episodeItem) {
         if (url && embedPreview) {
             embedPreview.style.display = 'block';
             if (url.includes('/api/media/') || url.endsWith('.mp4')) {
-                embedPreview.innerHTML = '<video src="' + url + '" controls style="width:100%;height:180px;border-radius:8px;background:#000;object-fit:contain;"></video>';
+                embedPreview.innerHTML = '<video src="' + url + '" controls crossorigin="anonymous" style="width:100%;height:180px;border-radius:8px;background:#000;object-fit:contain;"></video>';
             } else {
                 embedPreview.innerHTML = '<iframe src="' + url + '" style="width:100%;height:180px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
             }
@@ -472,7 +472,7 @@ function setupEpisodeVideoPreview(episodeItem) {
         if (url && mirrorPreview) {
             mirrorPreview.style.display = 'block';
             if (url.includes('/api/media/') || url.endsWith('.mp4')) {
-                mirrorPreview.innerHTML = '<video src="' + url + '" controls style="width:100%;height:180px;border-radius:8px;background:#000;object-fit:contain;"></video>';
+                mirrorPreview.innerHTML = '<video src="' + url + '" controls crossorigin="anonymous" style="width:100%;height:180px;border-radius:8px;background:#000;object-fit:contain;"></video>';
             } else {
                 mirrorPreview.innerHTML = '<iframe src="' + url + '" style="width:100%;height:180px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
             }
