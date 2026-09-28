@@ -407,7 +407,11 @@ function showVideoPreview(preview, url) {
     
     if (embedUrl) {
         preview.style.display = 'block';
-        preview.innerHTML = '<iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
+        if (embedUrl.includes('/api/media/') || embedUrl.endsWith('.mp4')) {
+            preview.innerHTML = '<video src="' + embedUrl + '" controls style="width:100%;height:200px;border-radius:8px;background:#000;object-fit:contain;"></video>';
+        } else {
+            preview.innerHTML = '<iframe src="' + embedUrl + '" style="width:100%;height:200px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
+        }
     } else {
         preview.style.display = 'none';
         preview.innerHTML = '';
@@ -452,7 +456,11 @@ function setupEpisodeVideoPreview(episodeItem) {
         var url = embedInput ? embedInput.value.trim() : '';
         if (url && embedPreview) {
             embedPreview.style.display = 'block';
-            embedPreview.innerHTML = '<iframe src="' + url + '" style="width:100%;height:180px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
+            if (url.includes('/api/media/') || url.endsWith('.mp4')) {
+                embedPreview.innerHTML = '<video src="' + url + '" controls style="width:100%;height:180px;border-radius:8px;background:#000;object-fit:contain;"></video>';
+            } else {
+                embedPreview.innerHTML = '<iframe src="' + url + '" style="width:100%;height:180px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
+            }
         } else if (embedPreview) {
             embedPreview.style.display = 'none';
             embedPreview.innerHTML = '';
@@ -463,7 +471,11 @@ function setupEpisodeVideoPreview(episodeItem) {
         var url = mirrorInput ? mirrorInput.value.trim() : '';
         if (url && mirrorPreview) {
             mirrorPreview.style.display = 'block';
-            mirrorPreview.innerHTML = '<iframe src="' + url + '" style="width:100%;height:180px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
+            if (url.includes('/api/media/') || url.endsWith('.mp4')) {
+                mirrorPreview.innerHTML = '<video src="' + url + '" controls style="width:100%;height:180px;border-radius:8px;background:#000;object-fit:contain;"></video>';
+            } else {
+                mirrorPreview.innerHTML = '<iframe src="' + url + '" style="width:100%;height:180px;border:none;border-radius:8px;" allowfullscreen loading="lazy"></iframe>';
+            }
         } else if (mirrorPreview) {
             mirrorPreview.style.display = 'none';
             mirrorPreview.innerHTML = '';
